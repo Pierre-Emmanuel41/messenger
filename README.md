@@ -41,7 +41,7 @@ Nota Bene: The values "+12", "+16", "+20" are indicatives values. Indeed the hea
 
 ### 3.2) Implementation
 
-The class that is responsible to generate messages whose structure has been previously introduced is <code>Message</code>. But the developer does not need to use directly this class. Actually, once the header structure has been defined, what really differ from one message to another is the payload. In order to generate the bytes array associated to the payload and to retrieve the payload from the bytes array, the developer needs to implement the interface <code>IMessageInterpreter</code>. It is highly recommended to have one interpreter for one specific message.  
+The class responsible for generating messages whose structure has been previously introduced is <code>Message</code>. But the developer does not need to use directly this class. Actually, once the header structure has been defined, what really differ from one message to another is the payload. In order to generate the bytes array associated to the payload and to retrieve the payload from the bytes array, the developer needs to implement the interface <code>IMessageInterpreter</code>. It is highly recommended to have one interpreter for one specific message.  
 Those interpreters can be stored in a class that implements the <code>InterpretersFactory</code>. Finally, the developer instantiate a <code>MessageFactory</code> with the specific interpreters factory in order to generate messages to send to the remote.
 
 ### 3.3) Tutorial
