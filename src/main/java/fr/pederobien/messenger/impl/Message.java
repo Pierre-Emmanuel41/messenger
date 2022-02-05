@@ -1,65 +1,37 @@
 package fr.pederobien.messenger.impl;
 
 import java.util.StringJoiner;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import fr.pederobien.messenger.interfaces.IHeader;
 import fr.pederobien.messenger.interfaces.IMessage;
-import fr.pederobien.messenger.interfaces.InterpretersFactory;
 import fr.pederobien.utils.ByteWrapper;
 
-public class Message<T extends IHeader<T>> implements IMessage<T> {
-	public static final byte[] SYNC_WORD = new byte[] { 98, 105, 110, 27 };
+public abstract class Message implements IMessage {
+	public static final byte[] BEGIN_WORD = new byte[] { 98, 105, 110, 27 };
 	public static final byte[] END_WORD = new byte[] { 13, 10 };
-	private static final AtomicInteger IDENTIFIER = new AtomicInteger(0);
 
-	private int identifier;
-	private InterpretersFactory<T> interpreters;
-	private T header;
-	private Object[] payload;
-	private byte[] bytes;
-	private String toString;
+	private String name;
+	private IHeader header;
+	protected byte[] bytes;
+	private Object[] properties;
 
-	public Message(InterpretersFactory<T> interpreters, T header, Object... payload) {
-		this.interpreters = interpreters;
+	/**
+	 * Creates a message represented by a name and a header. The message name is used for storage only but is never used during the
+	 * bytes generation.
+	 * 
+	 * @param name   The message name.
+	 * @param header The message header.
+	 */
+	public Message(String name, IHeader header) {
+		this.name = name;
 		this.header = header;
-		this.payload = payload;
 
-		identifier = IDENTIFIER.getAndIncrement();
-
-		initialize(true);
+		properties = new Object[0];
 	}
 
-	private Message(InterpretersFactory<T> interpreters, int identifier, T header, byte[] bytes, Object... payload) {
-		this.interpreters = interpreters;
-		this.identifier = identifier;
-		this.header = header;
-		this.bytes = bytes;
-		this.payload = payload;
-
-		initialize(false);
-	}
-
-	private Message(InterpretersFactory<T> interpreters, int identifier, T header, Object... payload) {
-		this.interpreters = interpreters;
-		this.identifier = identifier;
-		this.header = header;
-		this.payload = payload;
-
-		initialize(true);
-	}
-
-	public static <T extends IHeader<T>> IMessage<T> parse(InterpretersFactory<T> interpreters, T header, byte[] buffer) {
-		ByteWrapper wrapper = ByteWrapper.wrap(buffer);
-		int identifier = wrapper.getInt(4);
-
-		// 8 = SYNC_WORD.Length + identifier's byte array length.
-		T parsedHeader = header.parse(wrapper.extract(8, buffer.length - 8));
-
-		int payloadLengthIndex = SYNC_WORD.length + 4 + parsedHeader.getLength();
-		int payloadLength = wrapper.getInt(payloadLengthIndex);
-		Object[] payload = interpreters.get(parsedHeader).interprete(payloadLength == 0 ? new byte[0] : wrapper.extract(payloadLengthIndex + 4, payloadLength));
-		return new Message<T>(interpreters, identifier, parsedHeader, buffer, payload);
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	@Override
@@ -68,49 +40,44 @@ public class Message<T extends IHeader<T>> implements IMessage<T> {
 	}
 
 	@Override
-	public int getIdentifier() {
-		return identifier;
-	}
-
-	@Override
-	public Object[] getPayload() {
-		return payload;
-	}
-
-	@Override
-	public T getHeader() {
+	public IHeader getHeader() {
 		return header;
 	}
 
 	@Override
-	public IMessage<T> answer(Object... payload) {
-		return new Message<T>(interpreters, identifier, header, payload);
+	public byte[] generate() {
+		ByteWrapper wrapper = ByteWrapper.create().put(BEGIN_WORD).put(header.generate());
+		byte[] properties = generateProperties();
+		return bytes = wrapper.put(properties, true).put(END_WORD).get();
 	}
 
 	@Override
-	public IMessage<T> answer(T header, Object... payload) {
-		return new Message<T>(interpreters, identifier, header, payload);
+	public Object[] getProperties() {
+		return properties;
+	}
+
+	@Override
+	public void setProperties(Object... properties) {
+		this.properties = properties;
 	}
 
 	@Override
 	public String toString() {
-		return toString;
+		StringJoiner joiner = new StringJoiner(", ", "{", "}");
+		joiner.add("header=" + getHeader());
+
+		StringJoiner propertiesJoiner = new StringJoiner(", ", "{", "}");
+		for (Object property : properties)
+			propertiesJoiner.add(property.toString());
+		joiner.add("properties=" + propertiesJoiner);
+
+		return joiner.toString();
 	}
 
-	private void initialize(boolean generateBytes) {
-		if (generateBytes)
-			bytes = ByteWrapper.wrap(SYNC_WORD).putInt(identifier).put(header.getBytes()).put(interpreters.get(header).generate(payload), true).put(END_WORD).get();
-
-		StringJoiner joiner = new StringJoiner(",", "{", "}");
-		joiner.add(new String(SYNC_WORD));
-		joiner.add("identifier={" + identifier + "}");
-		joiner.add("header={" + header.toString() + "}");
-
-		StringJoiner joinerBis = new StringJoiner(",", "{", "}");
-		for (Object info : payload)
-			joinerBis.add(info.toString());
-		joiner.add("Payload=" + joinerBis.toString());
-
-		toString = joiner.toString();
-	}
+	/**
+	 * Generates a byte array containing additional header properties.
+	 * 
+	 * @return The bytes array representing only header additional properties.
+	 */
+	protected abstract byte[] generateProperties();
 }

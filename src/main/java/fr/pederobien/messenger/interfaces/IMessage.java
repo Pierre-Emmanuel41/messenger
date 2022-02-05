@@ -1,6 +1,11 @@
 package fr.pederobien.messenger.interfaces;
 
-public interface IMessage<T extends IHeader<T>> {
+public interface IMessage {
+
+	/**
+	 * @return The name of this message.
+	 */
+	String getName();
 
 	/**
 	 * @return The bytes array associated to this message.
@@ -8,37 +13,38 @@ public interface IMessage<T extends IHeader<T>> {
 	byte[] getBytes();
 
 	/**
-	 * @return The message identifier.
-	 */
-	int getIdentifier();
-
-	/**
-	 * @return An object array that contains informations to send to the remote.
-	 */
-	Object[] getPayload();
-
-	/**
 	 * @return The header associated to this message.
 	 */
-	T getHeader();
+	IHeader getHeader();
 
 	/**
-	 * Answer to this message with the given payload. Neither the identifier nor the header are modified.
+	 * Interpret the buffer in order to recreate message informations.
 	 * 
-	 * @param payload An array that contains the answer of this message.
+	 * @param buffer An array that contains message informations.
 	 * 
-	 * @return The message associated to the answer.
+	 * @return This parsed message.
 	 */
-	IMessage<T> answer(Object... payload);
+	IMessage parse(byte[] payload);
 
 	/**
-	 * Answer to this message with the given header and payload. The identifier is not modified.
+	 * Generates the bytes array according to the message properties. Once generated, the method {@link #getBytes()} returns the bytes
+	 * array resulting to the last call of this method.
 	 * 
-	 * @param header  The message header.
-	 * @param payload An array that contains the answer of this message.
-	 * 
-	 * @return The message associated to the answer.
+	 * @return The bytes array corresponding to the properties of this message.
 	 */
-	IMessage<T> answer(T header, Object... payload);
+	byte[] generate();
 
+	/**
+	 * @return An array that contains additional properties attached to this message.
+	 */
+	Object[] getProperties();
+
+	/**
+	 * The properties associated to this message. It correspond to additional information that can be specified by each implementation
+	 * of this interface. Changing the properties of this message does not regenerate the bytes array, the method {@link #generate()}
+	 * should be called.
+	 * 
+	 * @param properties The additional message properties.
+	 */
+	void setProperties(Object... properties);
 }
