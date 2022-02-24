@@ -3,6 +3,7 @@ package fr.pederobien.messenger.impl;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import fr.pederobien.messenger.interfaces.IHeader;
@@ -12,6 +13,7 @@ import fr.pederobien.messenger.interfaces.IProtocol;
 import fr.pederobien.utils.ByteWrapper;
 
 public class ProtocolManager {
+	private AtomicInteger identifiers;
 	private Function<Float, IHeader> header;
 	private Function<IHeader, String> parser;
 	private NavigableMap<Float, IProtocol> protocoles;
@@ -19,10 +21,12 @@ public class ProtocolManager {
 	/**
 	 * Creates a manager responsible to gather several version of the same communication protocol.
 	 * 
-	 * @param header The function responsible to create a new header when the function is called.
-	 * @param parser The function responsible to do the association between bytes and the message name.
+	 * @param beginIdentifier The first identifier from which next messages identifier are incremented by 1.
+	 * @param header          The function responsible to create a new header when the function is called.
+	 * @param parser          The function responsible to do the association between bytes and the message name.
 	 */
-	public ProtocolManager(Function<Float, IHeader> header, Function<IHeader, String> parser) {
+	public ProtocolManager(int beginIdentifier, Function<Float, IHeader> header, Function<IHeader, String> parser) {
+		identifiers = new AtomicInteger(beginIdentifier);
 		this.header = header;
 		this.parser = parser;
 		protocoles = new TreeMap<Float, IProtocol>();
@@ -40,7 +44,7 @@ public class ProtocolManager {
 	public IProtocol register(float version) {
 		checkVersion(version);
 
-		IProtocol protocol = new Protocol(version, header, parser);
+		IProtocol protocol = new Protocol(identifiers, version, header, parser);
 		protocoles.put(version, protocol);
 		return protocol;
 	}
@@ -49,8 +53,9 @@ public class ProtocolManager {
 	 * Register a new protocol associated to the given version. Each creator registered in the given <code>basedOn</code> protocol are
 	 * added to the new one.
 	 * 
-	 * @param version The protocol version to register.
-	 * @param basedOn The protocol on which the new protocol is based.
+	 * @param beginIdentifier The first identifier from which next identifier are incremented by 1.
+	 * @param version         The protocol version to register.
+	 * @param basedOn         The protocol on which the new protocol is based.
 	 * 
 	 * @return The created protocol.
 	 * 
@@ -122,6 +127,13 @@ public class ProtocolManager {
 	 */
 	public Function<IHeader, String> getParser() {
 		return parser;
+	}
+
+	/**
+	 * @return An atomic integer in order to generate unique identifiers.
+	 */
+	public AtomicInteger getIdentifiers() {
+		return identifiers;
 	}
 
 	private void checkVersion(float version) {

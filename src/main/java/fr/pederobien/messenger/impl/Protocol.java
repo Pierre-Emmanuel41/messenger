@@ -15,8 +15,7 @@ import fr.pederobien.messenger.interfaces.IMessageCreator;
 import fr.pederobien.messenger.interfaces.IProtocol;
 
 public class Protocol implements IProtocol {
-	private static final AtomicInteger IDENTIFIER = new AtomicInteger();
-
+	private AtomicInteger identifiers;
 	private Function<Float, IHeader> header;
 	private float version;
 	private Map<String, IMessageCreator> messages;
@@ -26,11 +25,13 @@ public class Protocol implements IProtocol {
 	 * Creates a new communication protocol in order to store supported messages that can be created in order to be sent through the
 	 * network or to be parsed when received from the network.
 	 * 
-	 * @param version The protocol version.
-	 * @param header  The supplier responsible to create a new header when the supplier is called.
-	 * @param parser  The function responsible to do the association between bytes and the message name.
+	 * @param identifiers An atomic integer in order to generate unique identifiers.
+	 * @param version     The protocol version.
+	 * @param header      The supplier responsible to create a new header when the supplier is called.
+	 * @param parser      The function responsible to do the association between bytes and the message name.
 	 */
-	protected Protocol(float version, Function<Float, IHeader> header, Function<IHeader, String> parser) {
+	protected Protocol(AtomicInteger identifiers, float version, Function<Float, IHeader> header, Function<IHeader, String> parser) {
+		this.identifiers = identifiers;
 		this.version = version;
 		this.header = header;
 		this.parser = parser;
@@ -60,7 +61,7 @@ public class Protocol implements IProtocol {
 			return null;
 
 		IMessage message = creator.create(header.apply(version));
-		message.getHeader().setIdentifier(IDENTIFIER.getAndIncrement());
+		message.getHeader().setIdentifier(identifiers.getAndIncrement());
 		return message;
 	}
 
@@ -72,7 +73,13 @@ public class Protocol implements IProtocol {
 
 	@Override
 	public IMessage answer(IMessage message, Object... properties) {
-		return answer(message, message.getHeader(), properties);
+		IMessageCreator creator = messages.get(message.getName());
+		if (creator == null)
+			return null;
+
+		IMessage answer = creator.create(message.getHeader());
+		answer.setProperties(properties);
+		return answer;
 	}
 
 	@Override
