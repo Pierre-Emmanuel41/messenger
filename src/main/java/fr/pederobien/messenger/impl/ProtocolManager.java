@@ -13,7 +13,7 @@ import fr.pederobien.messenger.interfaces.IProtocol;
 import fr.pederobien.utils.ByteWrapper;
 
 public class ProtocolManager {
-	private AtomicInteger sequences;
+	private AtomicInteger sequence;
 	private Function<Float, IHeader> header;
 	private Function<IHeader, String> parser;
 	private NavigableMap<Float, IProtocol> protocoles;
@@ -26,9 +26,10 @@ public class ProtocolManager {
 	 * @param parser   The function responsible to do the association between the header properties and the message name to create.
 	 */
 	public ProtocolManager(int sequence, Function<Float, IHeader> header, Function<IHeader, String> parser) {
-		sequences = new AtomicInteger(sequence);
+		this.sequence = new AtomicInteger(sequence);
 		this.header = header;
 		this.parser = parser;
+
 		protocoles = new TreeMap<Float, IProtocol>();
 	}
 
@@ -44,7 +45,7 @@ public class ProtocolManager {
 	public IProtocol register(float version) {
 		checkVersion(version);
 
-		IProtocol protocol = new Protocol(sequences, version, header, parser);
+		IProtocol protocol = new Protocol(sequence, version, header, parser);
 		protocoles.put(version, protocol);
 		return protocol;
 	}
@@ -129,10 +130,10 @@ public class ProtocolManager {
 	}
 
 	/**
-	 * @return An atomic integer in order to generate unique sequences.
+	 * @return An atomic integer in order to generate unique identifiers.
 	 */
-	public AtomicInteger getSequences() {
-		return sequences;
+	public AtomicInteger getSequence() {
+		return sequence;
 	}
 
 	private void checkVersion(float version) {
