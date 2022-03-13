@@ -3,16 +3,17 @@ package fr.pederobien.messenger.interfaces;
 public interface IHeader {
 
 	/**
-	 * @return The message identifier.
+	 * @return The message sequence number.
 	 */
-	int getIdentifier();
+	int getSequence();
 
 	/**
-	 * Set the identifier associated to this header.
+	 * Set the sequence number associated to this header. The sequence number represents internally an identifier. It should be unique
+	 * and increased each time a message is created.
 	 * 
-	 * @param identifier The header identifier.
+	 * @param sequenceNumber The header sequence number.
 	 */
-	void setIdentifier(int identifier);
+	void setSequence(int sequenceNumber);
 
 	/**
 	 * @return The protocol version associated to the message.

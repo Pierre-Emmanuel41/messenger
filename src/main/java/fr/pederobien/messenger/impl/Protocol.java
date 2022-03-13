@@ -15,7 +15,7 @@ import fr.pederobien.messenger.interfaces.IMessageCreator;
 import fr.pederobien.messenger.interfaces.IProtocol;
 
 public class Protocol implements IProtocol {
-	private AtomicInteger identifiers;
+	private AtomicInteger sequence;
 	private Function<Float, IHeader> header;
 	private float version;
 	private Map<String, IMessageCreator> messages;
@@ -25,13 +25,13 @@ public class Protocol implements IProtocol {
 	 * Creates a new communication protocol in order to store supported messages that can be created in order to be sent through the
 	 * network or to be parsed when received from the network.
 	 * 
-	 * @param identifiers An atomic integer in order to generate unique identifiers.
-	 * @param version     The protocol version.
-	 * @param header      The supplier responsible to create a new header when the supplier is called.
-	 * @param parser      The function responsible to do the association between bytes and the message name.
+	 * @param sequence An atomic integer in order to generate unique sequence number.
+	 * @param version  The protocol version.
+	 * @param header   The supplier responsible to create a new header when the supplier is called.
+	 * @param parser   The function responsible to do the association between the header properties and the message name to create.
 	 */
-	protected Protocol(AtomicInteger identifiers, float version, Function<Float, IHeader> header, Function<IHeader, String> parser) {
-		this.identifiers = identifiers;
+	protected Protocol(AtomicInteger sequence, float version, Function<Float, IHeader> header, Function<IHeader, String> parser) {
+		this.sequence = sequence;
 		this.version = version;
 		this.header = header;
 		this.parser = parser;
@@ -61,7 +61,7 @@ public class Protocol implements IProtocol {
 			return null;
 
 		IMessage message = creator.create(header.apply(version));
-		message.getHeader().setIdentifier(identifiers.getAndIncrement());
+		message.getHeader().setSequence(sequence.getAndIncrement());
 		return message;
 	}
 
@@ -99,7 +99,7 @@ public class Protocol implements IProtocol {
 	}
 
 	@Override
-	public Stream<IMessageCreator> toStream() {
+	public Stream<IMessageCreator> stream() {
 		return toList().stream();
 	}
 }

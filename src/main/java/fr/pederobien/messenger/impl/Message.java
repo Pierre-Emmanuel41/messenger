@@ -46,9 +46,7 @@ public abstract class Message implements IMessage {
 
 	@Override
 	public byte[] generate() {
-		ByteWrapper wrapper = ByteWrapper.create().put(BEGIN_WORD).put(header.generate());
-		byte[] properties = generateProperties();
-		return bytes = wrapper.put(properties, true).put(END_WORD).get();
+		return bytes = ByteWrapper.create().put(BEGIN_WORD).put(header.generate()).put(generateProperties(), true).put(END_WORD).get();
 	}
 
 	@Override

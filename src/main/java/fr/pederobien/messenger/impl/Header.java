@@ -6,32 +6,32 @@ import fr.pederobien.messenger.interfaces.IHeader;
 import fr.pederobien.utils.ByteWrapper;
 
 public abstract class Header implements IHeader {
-	private int identifier;
+	private int sequence;
 	private float version;
 	private byte[] bytes;
 	private Object[] properties;
 
 	/**
-	 * Creates a new header initialized with an empty bytes array and an identifier equals to -1.
+	 * Creates a new header initialized with an empty bytes array and a sequence number equals to -1.
 	 * 
 	 * @param version The protocol version used to create this header.
 	 */
 	public Header(float version) {
 		this.version = version;
 		bytes = new byte[0];
-		identifier = -1;
+		sequence = -1;
 
 		properties = new Object[0];
 	}
 
 	@Override
-	public int getIdentifier() {
-		return identifier;
+	public int getSequence() {
+		return sequence;
 	}
 
 	@Override
-	public void setIdentifier(int identifier) {
-		this.identifier = identifier;
+	public void setSequence(int sequence) {
+		this.sequence = sequence;
 	}
 
 	@Override
@@ -53,14 +53,14 @@ public abstract class Header implements IHeader {
 		version = wrapper.getFloat(index);
 		index += 4;
 
-		// +4: Identifier
-		identifier = wrapper.getInt(index);
+		// +4: Sequence
+		sequence = wrapper.getInt(index);
 		return this;
 	}
 
 	@Override
 	public byte[] generate() {
-		return bytes = ByteWrapper.create().putFloat(getVersion()).putInt(getIdentifier()).put(generateProperties()).get();
+		return bytes = ByteWrapper.create().putFloat(getVersion()).putInt(getSequence()).put(generateProperties()).get();
 	}
 
 	@Override
@@ -82,14 +82,14 @@ public abstract class Header implements IHeader {
 			return false;
 
 		IHeader other = (IHeader) obj;
-		return getIdentifier() == other.getIdentifier();
+		return getSequence() == other.getSequence();
 	}
 
 	@Override
 	public String toString() {
 		StringJoiner joiner = new StringJoiner(", ", "{", "}");
 		joiner.add("version=" + getVersion());
-		joiner.add("identifier=" + getIdentifier());
+		joiner.add("sequence=" + getSequence());
 
 		StringJoiner propertiesJoiner = new StringJoiner(", ", "{", "}");
 		for (Object property : properties)

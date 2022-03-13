@@ -69,5 +69,5 @@ public interface IProtocol extends Iterable<IMessageCreator> {
 	/**
 	 * @return a sequential {@code Stream} over the elements in this collection.
 	 */
-	Stream<IMessageCreator> toStream();
+	Stream<IMessageCreator> stream();
 }
