@@ -6,6 +6,16 @@ import fr.pederobien.messenger.interfaces.IHeader;
 import fr.pederobien.utils.ByteWrapper;
 
 public abstract class Header implements IHeader {
+	/**
+	 * The index at which there is the first byte of the communication protocol version.
+	 */
+	public static final int VERSION_INDEX = 4;
+
+	/**
+	 * The index at which there is the first byte of the sequence number.
+	 */
+	public static final int SEQUENCE_NUMBER_INDEX = 8;
+
 	private int sequence;
 	private float version;
 	private byte[] bytes;
@@ -47,14 +57,12 @@ public abstract class Header implements IHeader {
 	@Override
 	public IHeader parse(byte[] buffer) {
 		ByteWrapper wrapper = ByteWrapper.wrap(buffer);
-		int index = 0;
 
 		// +0: Version
-		version = wrapper.getFloat(index);
-		index += 4;
+		version = wrapper.getFloat(VERSION_INDEX - Message.BEGIN_WORD.length);
 
 		// +4: Sequence
-		sequence = wrapper.getInt(index);
+		sequence = wrapper.getInt(SEQUENCE_NUMBER_INDEX - Message.BEGIN_WORD.length);
 		return this;
 	}
 

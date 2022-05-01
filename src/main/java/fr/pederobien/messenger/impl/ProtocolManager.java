@@ -109,10 +109,14 @@ public class ProtocolManager {
 		if (protocol == null)
 			return null;
 
-		IHeader parsed = header.apply(version).parse(wrapper.extract(4, buffer.length - 4));
-		byte[] headerBytes = parsed.generate();
-		byte[] properties = wrapper.extract(8 + headerBytes.length, buffer.length - (8 + headerBytes.length + 2));
-		return protocol.parse(parsed, properties);
+		try {
+			IHeader parsed = header.apply(version).parse(wrapper.extract(4, buffer.length - 4));
+			byte[] headerBytes = parsed.generate();
+			byte[] properties = wrapper.extract(8 + headerBytes.length, buffer.length - (8 + headerBytes.length + 2));
+			return protocol.parse(parsed, properties);
+		} catch (Exception e) {
+			throw new RequestMalFormedException(buffer);
+		}
 	}
 
 	/**

@@ -12,7 +12,7 @@ public abstract class Message implements IMessage {
 
 	private String name;
 	private IHeader header;
-	protected byte[] bytes;
+	private byte[] bytes;
 	private Object[] properties;
 
 	/**
