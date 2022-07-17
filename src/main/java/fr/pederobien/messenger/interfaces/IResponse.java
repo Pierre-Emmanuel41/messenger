@@ -12,6 +12,6 @@ public interface IResponse {
 	 * @return If an exception or an error occurs. An error code with value 0 is considered as no error.
 	 */
 	default boolean hasFailed() {
-		return getErrorCode().getCode() == 0;
+		return getErrorCode().getCode() != 0;
 	}
 }
