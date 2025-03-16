@@ -1,9 +1,8 @@
 package fr.pederobien.messenger.interfaces;
 
-import java.util.List;
-import java.util.stream.Stream;
+import fr.pederobien.utils.ReadableByteWrapper;
 
-public interface IProtocol extends Iterable<IMessageCreator> {
+public interface IProtocol {
 
 	/**
 	 * @return The version of this protocol.
@@ -11,63 +10,32 @@ public interface IProtocol extends Iterable<IMessageCreator> {
 	float getVersion();
 
 	/**
-	 * Register a message creator in order to create a message to send through the network or received from the network.
+	 * Register internally a request configuration to easily generate a request.
 	 * 
-	 * @param name    The message name.
-	 * @param creator A function responsible to create a specific message.
+	 * @param identifier The request identifier.
+	 * @param payload    the request payload.
 	 */
-	void register(IMessageCreator creator);
+	void register(int identifier, IPayload payload);
 
 	/**
-	 * Creates a message.
+	 * Creates a new request to send to the remote if the given identifier is
+	 * supported by the protocol.
 	 * 
-	 * @param name   The name of the message to build.
-	 * @param header The properties associated to the header of the message to build.
+	 * @param identifier The identifier of the request to create.
 	 * 
-	 * @return A message.
+	 * @return The created request if the identifier is supported, false otherwise.
 	 */
-	IMessage get(String name);
+	IRequest get(int identifier);
 
 	/**
-	 * Interprets the given buffer in order to return the associated message with interpreted properties.
+	 * Parse the content of the input wrapper. The input array shall have the
+	 * following format:<br>
+	 * <br>
+	 * Byte 0 -> 3: Message identifier<br>
+	 * Byte 4 -> 7: Error code<br>
+	 * Byte 8 -> end: Payload<br>
 	 * 
-	 * @param header The header that contains already parsed information.
-	 * @param buffer The bytes array that contains data to interpret.
-	 * 
-	 * @return The associated message.
+	 * @param wrapper The wrapper that contains request information.
 	 */
-	IMessage parse(IHeader header, byte[] buffer);
-
-	/**
-	 * Creates a new message corresponding to the answer of the <code>message</code>. Neither the identifier nor the header are
-	 * modified.
-	 * 
-	 * @param message    The message to answer.
-	 * @param properties The response properties.
-	 * 
-	 * @return A new message.
-	 */
-	IMessage answer(IMessage message, Object... properties);
-
-	/**
-	 * Creates a new message corresponding to the answer of the <code>message</code>. Neither the identifier nor the header are
-	 * modified.
-	 * 
-	 * @param message    The message to answer.
-	 * @param header     The response header.
-	 * @param properties The response properties.
-	 * 
-	 * @return A new message.
-	 */
-	IMessage answer(IMessage message, IHeader header, Object... properties);
-
-	/**
-	 * @return A copy of the list of registered message creator.
-	 */
-	List<IMessageCreator> toList();
-
-	/**
-	 * @return a sequential {@code Stream} over the elements in this collection.
-	 */
-	Stream<IMessageCreator> stream();
+	IRequest parse(ReadableByteWrapper wrapper);
 }

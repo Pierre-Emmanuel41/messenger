@@ -1,47 +1,29 @@
 package fr.pederobien.messenger.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
-import fr.pederobien.messenger.interfaces.IHeader;
-import fr.pederobien.messenger.interfaces.IMessage;
-import fr.pederobien.messenger.interfaces.IMessageCreator;
+import fr.pederobien.messenger.interfaces.IErrorCodeFactory;
+import fr.pederobien.messenger.interfaces.IPayload;
 import fr.pederobien.messenger.interfaces.IProtocol;
+import fr.pederobien.messenger.interfaces.IRequest;
+import fr.pederobien.utils.ReadableByteWrapper;
 
 public class Protocol implements IProtocol {
-	private AtomicInteger sequence;
-	private Function<Float, IHeader> header;
 	private float version;
-	private Map<String, IMessageCreator> messages;
-	private Function<IHeader, String> parser;
+	private Map<Integer, RequestConfig> configs;
+	private IErrorCodeFactory factory;
 
 	/**
-	 * Creates a new communication protocol in order to store supported messages that can be created in order to be sent through the
-	 * network or to be parsed when received from the network.
+	 * Creates a protocol associated to a specific version.
 	 * 
-	 * @param sequence An atomic integer in order to generate unique sequence number.
-	 * @param version  The protocol version.
-	 * @param header   The supplier responsible to create a new header when the supplier is called.
-	 * @param parser   The function responsible to do the association between the header properties and the message name to create.
+	 * @param version The protocol version
 	 */
-	protected Protocol(AtomicInteger sequence, float version, Function<Float, IHeader> header, Function<IHeader, String> parser) {
-		this.sequence = sequence;
+	public Protocol(float version, IErrorCodeFactory factory) {
 		this.version = version;
-		this.header = header;
-		this.parser = parser;
+		this.factory = factory;
 
-		messages = new HashMap<String, IMessageCreator>();
-	}
-
-	@Override
-	public Iterator<IMessageCreator> iterator() {
-		return messages.values().iterator();
+		configs = new HashMap<Integer, RequestConfig>();
 	}
 
 	@Override
@@ -50,56 +32,59 @@ public class Protocol implements IProtocol {
 	}
 
 	@Override
-	public void register(IMessageCreator creator) {
-		messages.put(creator.getName(), creator);
+	public void register(int identifier, IPayload payload) {
+		configs.put(identifier, new RequestConfig(identifier, payload));
 	}
 
 	@Override
-	public IMessage get(String name) {
-		IMessageCreator creator = messages.get(name);
-		if (creator == null)
+	public IRequest get(int identifier) {
+		RequestConfig config = configs.get(identifier);
+
+		// Check if identifier is supported
+		if (config == null)
 			return null;
 
-		IMessage message = creator.create(header.apply(version));
-		message.getHeader().setSequence(sequence.getAndIncrement());
-		return message;
+		return new Request(version, factory, config.getIdentifier(), 0, config.getPayload());
 	}
 
 	@Override
-	public IMessage parse(IHeader header, byte[] buffer) {
-		IMessageCreator creator = messages.get(parser.apply(header));
-		return creator == null ? null : creator.create(header).parse(buffer);
-	}
-
-	@Override
-	public IMessage answer(IMessage message, Object... properties) {
-		IMessageCreator creator = messages.get(message.getName());
-		if (creator == null)
+	public IRequest parse(ReadableByteWrapper wrapper) {
+		// Byte 0 -> 3: Request identifier
+		IRequest request = get(wrapper.nextInt());
+		if (request == null) {
 			return null;
+		}
 
-		IMessage answer = creator.create(message.getHeader());
-		answer.setProperties(properties);
-		return answer;
+		return request.parse(wrapper);
 	}
 
-	@Override
-	public IMessage answer(IMessage message, IHeader header, Object... properties) {
-		IMessageCreator creator = messages.get(message.getName());
-		if (creator == null)
-			return null;
+	private class RequestConfig {
+		private int identifier;
+		private IPayload payload;
 
-		IMessage answer = creator.create(header);
-		answer.setProperties(properties);
-		return answer;
-	}
+		/**
+		 * Creates a request configuration.
+		 * 
+		 * @param identifier The request identifier.
+		 * @param payload    The request payload
+		 */
+		public RequestConfig(int identifier, IPayload payload) {
+			this.identifier = identifier;
+			this.payload = payload;
+		}
 
-	@Override
-	public List<IMessageCreator> toList() {
-		return new ArrayList<IMessageCreator>(messages.values());
-	}
+		/**
+		 * @return The request identifier.
+		 */
+		public int getIdentifier() {
+			return identifier;
+		}
 
-	@Override
-	public Stream<IMessageCreator> stream() {
-		return toList().stream();
+		/**
+		 * @return The request payload.
+		 */
+		public IPayload getPayload() {
+			return payload;
+		}
 	}
 }

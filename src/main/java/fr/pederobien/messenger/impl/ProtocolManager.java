@@ -1,144 +1,109 @@
 package fr.pederobien.messenger.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
-import fr.pederobien.messenger.interfaces.IHeader;
-import fr.pederobien.messenger.interfaces.IMessage;
-import fr.pederobien.messenger.interfaces.IMessageCreator;
+import fr.pederobien.messenger.interfaces.IErrorCodeFactory;
 import fr.pederobien.messenger.interfaces.IProtocol;
-import fr.pederobien.utils.ByteWrapper;
+import fr.pederobien.messenger.interfaces.IRequest;
+import fr.pederobien.utils.ReadableByteWrapper;
 
 public class ProtocolManager {
-	private AtomicInteger sequence;
-	private Function<Float, IHeader> header;
-	private Function<IHeader, String> parser;
-	private NavigableMap<Float, IProtocol> protocoles;
+	private NavigableMap<Float, IProtocol> protocols;
+	private IErrorCodeFactory factory;
 
 	/**
-	 * Creates a manager responsible to gather several version of the same communication protocol.
-	 * 
-	 * @param sequence The first sequence number from which next messages sequence are incremented by 1.
-	 * @param header   The function responsible to create a new header when the function is called.
-	 * @param parser   The function responsible to do the association between the header properties and the message name to create.
+	 * Creates a protocol manager to insure the backward compatibility.
 	 */
-	public ProtocolManager(int sequence, Function<Float, IHeader> header, Function<IHeader, String> parser) {
-		this.sequence = new AtomicInteger(sequence);
-		this.header = header;
-		this.parser = parser;
-
-		protocoles = new TreeMap<Float, IProtocol>();
+	public ProtocolManager() {
+		protocols = new TreeMap<Float, IProtocol>();
+		factory = new ErrorCodeFactory();
 	}
 
 	/**
-	 * Register a new protocol associated to the given version.
+	 * Creates a protocol if no protocol is existing for the given version.
 	 * 
-	 * @param version The protocol version.
+	 * @param version The protocol version to get or to create.
 	 * 
-	 * @return The created protocol.
-	 * 
-	 * @throws ProtocolAlreadyRegisteredException If a protocol is already registered for the given version.
+	 * @return The protocol associated to the given version.
 	 */
-	public IProtocol register(float version) {
-		checkVersion(version);
-
-		IProtocol protocol = new Protocol(sequence, version, header, parser);
-		protocoles.put(version, protocol);
-		return protocol;
-	}
-
-	/**
-	 * Register a new protocol associated to the given version. Each creator registered in the given <code>basedOn</code> protocol are
-	 * added to the new one.
-	 * 
-	 * @param version The protocol version to register.
-	 * @param basedOn The protocol on which the new protocol is based.
-	 * 
-	 * @return The created protocol.
-	 * 
-	 * @throws ProtocolAlreadyRegisteredException If a protocol is already registered for the given version.
-	 */
-	public IProtocol register(float version, IProtocol basedOn) {
-		IProtocol protocol = register(version);
-
-		for (IMessageCreator creator : basedOn)
-			protocol.register(creator);
+	public IProtocol getOrCreate(float version) {
+		IProtocol protocol = protocols.get(version);
+		if (protocol == null) {
+			protocol = new Protocol(version, factory);
+			protocols.put(version, protocol);
+		}
 
 		return protocol;
 	}
 
 	/**
-	 * Get the protocol associated to the given version.
+	 * Use the latest protocol version to generate a request.
 	 * 
-	 * @param version The version of the protocol to retrieve.
+	 * @param identifier The identifier of the request to generate.
 	 * 
-	 * @return An optional that contains the protocol if registered, an empty optional otherwise.
+	 * @return The generated request if the identifier is supported, null otherwise.
 	 */
-	public Optional<IProtocol> getProtocol(float version) {
-		return Optional.ofNullable(protocoles.get(version));
+	public IRequest get(int identifier) {
+		return protocols.lastEntry().getValue().get(identifier);
 	}
 
 	/**
-	 * @return The protocol associated to the latest version.
-	 */
-	public IProtocol getLatest() {
-		return protocoles.lastEntry().getValue();
-	}
-
-	/**
-	 * Creates a message that contains parsed information relative to the given bytes array.
+	 * Parse the given bytes array. The input array shall have the following
+	 * format:<br>
 	 * 
-	 * @param buffer The bytes array that contains data to interpret.
+	 * Byte 0 -> 3: Protocol version<br>
+	 * Byte 4 -> 7: message identifier<br>
+	 * Byte 8 -> 11: Error code<br>
+	 * Byte 12 -> end: payload
 	 * 
-	 * @return The message that contains interpreted information.
+	 * @param data The bytes array that contains message information.
+	 * 
+	 * @return The message corresponding to the content of the bytes array, null if
+	 *         the protocol version is not supported or if the message identifier is
+	 *         not supported for the protocol version.
 	 */
-	public IMessage parse(byte[] buffer) {
-		ByteWrapper wrapper = ByteWrapper.wrap(buffer);
-		int index = 0;
+	public IRequest parse(byte[] data) {
+		ReadableByteWrapper wrapper = ReadableByteWrapper.wrap(data);
 
-		// +0: Begin word
-		index += 4;
+		// Byte 0 -> 3: Protocol version
+		float version = wrapper.nextFloat();
 
-		// +4: Version
-		float version = wrapper.getFloat(index);
-
-		IProtocol protocol = protocoles.get(version);
-		if (protocol == null)
+		IProtocol protocol = protocols.get(version);
+		if (protocol == null) {
 			return null;
+		}
 
-		IHeader parsed = header.apply(version).parse(wrapper.extract(4, buffer.length - 4));
-		byte[] headerBytes = parsed.generate();
-		byte[] properties = wrapper.extract(8 + headerBytes.length, buffer.length - (8 + headerBytes.length + 2));
-		return protocol.parse(parsed, properties);
+		return protocol.parse(wrapper);
 	}
 
 	/**
-	 * @return header The function responsible to create a new header when the function is called.
+	 * @return The error code factory to store all possible errors and their
+	 *         meaning.
 	 */
-	public Function<Float, IHeader> getHeader() {
-		return header;
+	public IErrorCodeFactory getErrorCodeFactory() {
+		return factory;
 	}
 
-	/**
-	 * @return parser The function responsible to do the association between bytes and the message name.
-	 */
-	public Function<IHeader, String> getParser() {
-		return parser;
-	}
+	private class ErrorCodeFactory implements IErrorCodeFactory {
+		private static final String NOT_SUPPORTED = "CODE_NOT_SUPPORTED";
+		private Map<Integer, String> errorCodes;
 
-	/**
-	 * @return An atomic integer in order to generate unique identifiers.
-	 */
-	public AtomicInteger getSequence() {
-		return sequence;
-	}
+		public ErrorCodeFactory() {
+			errorCodes = new HashMap<Integer, String>();
+		}
 
-	private void checkVersion(float version) {
-		IProtocol protocol = protocoles.get(version);
-		if (protocol != null)
-			throw new ProtocolAlreadyRegisteredException(protocol);
+		@Override
+		public void register(int value, String message) {
+			errorCodes.put(value, message);
+		}
+
+		@Override
+		public String getMessage(int value) {
+			String message = errorCodes.get(value);
+			return message == null ? NOT_SUPPORTED : message;
+		}
 	}
 }
