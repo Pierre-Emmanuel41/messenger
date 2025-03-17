@@ -4,7 +4,7 @@ import fr.pederobien.messenger.interfaces.IPayload;
 import fr.pederobien.utils.ByteWrapper;
 import fr.pederobien.utils.ReadableByteWrapper;
 
-public class EntityPayloadV10 implements IPayload {
+public class EntityWrapperV10 implements IPayload {
 	private Entity entity;
 
 	@Override

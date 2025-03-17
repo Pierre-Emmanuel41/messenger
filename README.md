@@ -1,6 +1,6 @@
 # 1) Presentation
 
-With the project [communication](https://github.com/Pierre-Emmanuel41/communication.git), developers can send and receive data from the remote in an asynchronous way. However there is no structure proposed for the messages to send. That is why, this project propose an overlay in order to send data with a header, a payload and other informations that are useful for the remote when data is extracted.
+The 
 
 # 2) Download
 
