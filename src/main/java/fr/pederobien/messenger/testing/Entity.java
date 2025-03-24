@@ -31,10 +31,7 @@ public class Entity {
 	 * @param age  The entity age.
 	 */
 	public Entity(String type, String name, int age) {
-		this.type = type;
-		this.name = name;
-		this.age = age;
-		this.city = "Not defined";
+		this(type, name, age, "Not defined");
 	}
 
 	/**
