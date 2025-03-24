@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fr.pederobien.messenger.interfaces.IErrorCodeFactory;
-import fr.pederobien.messenger.interfaces.IPayload;
+import fr.pederobien.messenger.interfaces.IPayloadWrapper;
 import fr.pederobien.messenger.interfaces.IProtocol;
 import fr.pederobien.messenger.interfaces.IRequest;
 import fr.pederobien.utils.ReadableByteWrapper;
@@ -32,25 +32,28 @@ public class Protocol implements IProtocol {
 	}
 
 	@Override
-	public void register(int identifier, IPayload payload) {
+	public void register(int identifier, IPayloadWrapper payload) {
 		configs.put(identifier, new RequestConfig(identifier, payload));
 	}
 
 	@Override
 	public IRequest get(int identifier) {
-		RequestConfig config = configs.get(identifier);
-
-		// Check if identifier is supported
-		if (config == null)
-			return null;
-
-		return new Request(version, factory, config.getIdentifier(), 0, config.getPayload());
+		return generateRequest(identifier);
 	}
 
-	@Override
+	/**
+	 * Parse the content of the input wrapper. The input array shall have the
+	 * following format:<br>
+	 * <br>
+	 * Byte 0 -> 3: Message identifier<br>
+	 * Byte 4 -> 7: Error code<br>
+	 * Byte 8 -> end: Payload<br>
+	 * 
+	 * @param wrapper The wrapper that contains request information.
+	 */
 	public IRequest parse(ReadableByteWrapper wrapper) {
 		// Byte 0 -> 3: Request identifier
-		IRequest request = get(wrapper.nextInt());
+		Request request = generateRequest(wrapper.nextInt());
 		if (request == null) {
 			return null;
 		}
@@ -58,33 +61,21 @@ public class Protocol implements IProtocol {
 		return request.parse(wrapper);
 	}
 
-	private class RequestConfig {
-		private int identifier;
-		private IPayload payload;
+	/**
+	 * Check if the identifier is supported by this protocol. If so, returns a new
+	 * Request associated to the given identifier.
+	 * 
+	 * @param identifier The request identifier.
+	 * 
+	 * @return The created request.
+	 */
+	private Request generateRequest(int identifier) {
+		RequestConfig config = configs.get(identifier);
 
-		/**
-		 * Creates a request configuration.
-		 * 
-		 * @param identifier The request identifier.
-		 * @param payload    The request payload
-		 */
-		public RequestConfig(int identifier, IPayload payload) {
-			this.identifier = identifier;
-			this.payload = payload;
-		}
+		// Check if identifier is supported
+		if (config == null)
+			return null;
 
-		/**
-		 * @return The request identifier.
-		 */
-		public int getIdentifier() {
-			return identifier;
-		}
-
-		/**
-		 * @return The request payload.
-		 */
-		public IPayload getPayload() {
-			return payload;
-		}
+		return new Request(version, factory, 0, config);
 	}
 }

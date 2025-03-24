@@ -1,7 +1,5 @@
 package fr.pederobien.messenger.interfaces;
 
-import fr.pederobien.utils.ReadableByteWrapper;
-
 public interface IRequest {
 
 	/**
@@ -27,20 +25,16 @@ public interface IRequest {
 	void setErrorCode(int errorCode);
 
 	/**
-	 * @return The request payload.
+	 * Set the payload object to sent/received from the remote.
+	 * 
+	 * @param value The payload value.
 	 */
-	IPayload getPayload();
+	void setPayload(Object value);
 
 	/**
-	 * Parse the content of the input wrapper. The input array shall have the
-	 * following format:<br>
-	 * <br>
-	 * Byte 0 -> 3: Error code<br>
-	 * Byte 4 -> end: Payload<br>
-	 * 
-	 * @param wrapper The wrapper that contains request information.
+	 * @return The payload object of this request.
 	 */
-	IRequest parse(ReadableByteWrapper wrapper);
+	Object getPayload();
 
 	/**
 	 * Generates a bytes array with the following format:<br>

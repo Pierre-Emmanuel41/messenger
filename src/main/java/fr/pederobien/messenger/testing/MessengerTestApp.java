@@ -21,7 +21,7 @@ public class MessengerTestApp {
 		IRequest request = manager.get(identifier);
 
 		Entity payload = new Entity("Player", "Jack", 30);
-		request.getPayload().set(payload);
+		request.setPayload(payload);
 
 		String formatter = "Request with protocol 1.0: %s";
 		System.out.println(String.format(formatter, request));
@@ -34,7 +34,7 @@ public class MessengerTestApp {
 
 		// Simulating a request being received from the remote
 		IRequest received = manager.parse(data);
-		if (received.getIdentifier() == identifier && received.getPayload().get().equals(payload)) {
+		if (received.getIdentifier() == identifier && received.getPayload().equals(payload)) {
 			System.out.println("Received request match the sent request for protocol 1.0");
 		} else
 			System.out.println("An issue occured");
@@ -47,7 +47,7 @@ public class MessengerTestApp {
 		request = manager.get(identifier);
 
 		payload = new Entity("PNJ", "Davy", 60, "Sea");
-		request.getPayload().set(payload);
+		request.setPayload(payload);
 
 		formatter = "Request with protocol 1.0: %s";
 		System.out.println(String.format(formatter, request));
@@ -60,7 +60,7 @@ public class MessengerTestApp {
 
 		// Simulating a request being received from the remote
 		received = manager.parse(data);
-		if (received.getIdentifier() == identifier && received.getPayload().get().equals(payload)) {
+		if (received.getIdentifier() == identifier && received.getPayload().equals(payload)) {
 			System.out.println("Received request match the sent request for protocol 2.0");
 		} else
 			System.out.println("An issue occured");

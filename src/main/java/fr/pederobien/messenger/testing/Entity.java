@@ -73,7 +73,7 @@ public class Entity {
 			return false;
 
 		Entity other = (Entity) obj;
-		return type.equals(other.type) && name.equals(other.name) && age == other.age;
+		return type.equals(other.type) && name.equals(other.name) && age == other.age && city.equals(other.city);
 	}
 
 	@Override

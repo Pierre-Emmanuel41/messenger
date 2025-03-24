@@ -11,14 +11,14 @@ import fr.pederobien.messenger.interfaces.IRequest;
 import fr.pederobien.utils.ReadableByteWrapper;
 
 public class ProtocolManager {
-	private NavigableMap<Float, IProtocol> protocols;
+	private NavigableMap<Float, Protocol> protocols;
 	private IErrorCodeFactory factory;
 
 	/**
 	 * Creates a protocol manager to insure the backward compatibility.
 	 */
 	public ProtocolManager() {
-		protocols = new TreeMap<Float, IProtocol>();
+		protocols = new TreeMap<Float, Protocol>();
 		factory = new ErrorCodeFactory();
 	}
 
@@ -30,7 +30,7 @@ public class ProtocolManager {
 	 * @return The protocol associated to the given version.
 	 */
 	public IProtocol getOrCreate(float version) {
-		IProtocol protocol = protocols.get(version);
+		Protocol protocol = protocols.get(version);
 		if (protocol == null) {
 			protocol = new Protocol(version, factory);
 			protocols.put(version, protocol);
@@ -71,7 +71,7 @@ public class ProtocolManager {
 		// Byte 0 -> 3: Protocol version
 		float version = wrapper.nextFloat();
 
-		IProtocol protocol = protocols.get(version);
+		Protocol protocol = protocols.get(version);
 		if (protocol == null) {
 			return null;
 		}
