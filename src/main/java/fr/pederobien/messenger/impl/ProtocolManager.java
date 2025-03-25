@@ -52,7 +52,7 @@ public class ProtocolManager {
 		Iterator<Map.Entry<Float, Protocol>> iterator = protocols.descendingMap().entrySet().iterator();
 		IRequest request = null;
 
-		while (iterator.hasNext() && request != null) {
+		while (iterator.hasNext() && request == null) {
 			request = iterator.next().getValue().get(identifier);
 		}
 
