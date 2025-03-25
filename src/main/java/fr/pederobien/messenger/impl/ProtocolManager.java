@@ -1,6 +1,7 @@
 package fr.pederobien.messenger.impl;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -40,14 +41,22 @@ public class ProtocolManager {
 	}
 
 	/**
-	 * Use the latest protocol version to generate a request.
+	 * Find the latest protocol version that support the given identifier. If a
+	 * protocol supports the identifier then a request will be created.
 	 * 
 	 * @param identifier The identifier of the request to generate.
 	 * 
-	 * @return The generated request if the identifier is supported, null otherwise.
+	 * @return The request if the identifier is supported, null otherwise.
 	 */
 	public IRequest get(int identifier) {
-		return protocols.lastEntry().getValue().get(identifier);
+		Iterator<Map.Entry<Float, Protocol>> iterator = protocols.descendingMap().entrySet().iterator();
+		IRequest request = null;
+
+		while (iterator.hasNext() && request != null) {
+			request = iterator.next().getValue().get(identifier);
+		}
+
+		return request;
 	}
 
 	/**
