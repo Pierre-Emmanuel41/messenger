@@ -14,7 +14,7 @@ public class Request implements IRequest {
 	private int identifier;
 	private int errorCode;
 	private Object value;
-	private IPayloadWrapper payloadWrapper;
+	private IPayloadWrapper wrapper;
 
 	/**
 	 * Creates a message to send to the remote.
@@ -25,12 +25,12 @@ public class Request implements IRequest {
 	 * @param config    The request configuration that contains the request
 	 *                  identifier and the generator/parser to send/parse data.
 	 */
-	public Request(float version, IErrorCodeFactory factory, int errorCode, RequestConfig config) {
+	public Request(float version, IErrorCodeFactory factory, int identifier, int errorCode, IPayloadWrapper wrapper) {
 		this.version = version;
 		this.factory = factory;
 		this.errorCode = errorCode;
-		this.identifier = config.getIdentifier();
-		this.payloadWrapper = config.getWrapper();
+		this.identifier = identifier;
+		this.wrapper = wrapper;
 	}
 
 	@Override
@@ -65,21 +65,21 @@ public class Request implements IRequest {
 
 	@Override
 	public byte[] getBytes() {
-		ByteWrapper wrapper = ByteWrapper.create();
+		ByteWrapper byteWrapper = ByteWrapper.create();
 
 		// Byte 0 -> 3: Protocol version
-		wrapper.putFloat(version);
+		byteWrapper.putFloat(version);
 
 		// Byte 4 -> 7: Request identifier
-		wrapper.putInt(identifier);
+		byteWrapper.putInt(identifier);
 
 		// Byte 8 -> 11: Error code
-		wrapper.putInt(errorCode);
+		byteWrapper.putInt(errorCode);
 
 		// Byte 12 -> end: Request payload
-		wrapper.put(payloadWrapper.getBytes(value));
+		byteWrapper.put(wrapper.getBytes(value));
 
-		return wrapper.get();
+		return byteWrapper.get();
 	}
 
 	@Override
@@ -101,14 +101,14 @@ public class Request implements IRequest {
 	 * Byte 0 -> 3: Error code<br>
 	 * Byte 4 -> end: Payload<br>
 	 * 
-	 * @param wrapper The wrapper that contains request information.
+	 * @param byteWrapper The wrapper that contains request information.
 	 */
-	public IRequest parse(ReadableByteWrapper wrapper) {
+	public IRequest parse(ReadableByteWrapper byteWrapper) {
 		// Byte 0 -> 3: Error code
-		errorCode = wrapper.nextInt();
+		errorCode = byteWrapper.nextInt();
 
 		// Byte 4 -> end: payload
-		value = payloadWrapper.parse(wrapper.next(-1));
+		value = wrapper.parse(byteWrapper.next(-1));
 
 		return this;
 	}

@@ -32,11 +32,18 @@ public class Protocol implements IProtocol {
 	}
 
 	@Override
-	public void register(int identifier, IPayloadWrapper payload) {
-		configs.put(identifier, new RequestConfig(identifier, payload));
+	public void register(int identifier, IPayloadWrapper wrapper) {
+		configs.put(identifier, new RequestConfig(identifier, wrapper));
 	}
 
-	@Override
+	/**
+	 * Creates a new request to send to the remote if the given identifier is
+	 * supported by the protocol.
+	 * 
+	 * @param identifier The identifier of the request to create.
+	 * 
+	 * @return The created request if the identifier is supported, false otherwise.
+	 */
 	public IRequest get(int identifier) {
 		return generateRequest(identifier);
 	}
@@ -76,6 +83,37 @@ public class Protocol implements IProtocol {
 		if (config == null)
 			return null;
 
-		return new Request(version, factory, 0, config);
+		return new Request(version, factory, config.getIdentifier(), 0, config.getWrapper());
+	}
+
+	private class RequestConfig {
+		private int identifier;
+		private IPayloadWrapper wrapper;
+
+		/**
+		 * Creates a request configuration.
+		 * 
+		 * @param identifier The request identifier.
+		 * @param wrapper    The wrapper that parse/generates a bytes array from an
+		 *                   object payload.
+		 */
+		public RequestConfig(int identifier, IPayloadWrapper wrapper) {
+			this.identifier = identifier;
+			this.wrapper = wrapper;
+		}
+
+		/**
+		 * @return The request identifier.
+		 */
+		public int getIdentifier() {
+			return identifier;
+		}
+
+		/**
+		 * @return The payload wrapper.
+		 */
+		public IPayloadWrapper getWrapper() {
+			return wrapper;
+		}
 	}
 }
