@@ -1,16 +1,17 @@
 # 1) Presentation
 
-The 
+This project propose an easy way to define how data can be exchanged between a client and a server and preserve backward compatibility using protocol versions. The goal of this project is to be used with the [communication](https://github.com/Pierre-Emmanuel41/communication) project.
 
-# 2) Download
 
-First you need to download this project on your computer. To do so, you can use the following command line :
+# 2) Download and compilation
+
+First you need to download this project on your computer. To do so, you can use the following command line:
 
 ```git
-git clone -b 2.0-SNAPSHOT https://github.com/Pierre-Emmanuel41/messenger.git --recursive
+git clone https://github.com/Pierre-Emmanuel41/messenger.git
 ```
 
-and then double click on the deploy.bat file. This will deploy this project and all its dependencies on your computer. Which means it generates the folder associated to this project and its dependencies in your .m2 folder. Once this has been done, you can add the project as maven dependency on your maven project :
+Executing the batch file <code>deploy.bat</code> will download each dependency and build everything. Finally, you can add the project as maven dependency to your maven project :
 
 ```xml
 <dependency>
@@ -22,221 +23,94 @@ and then double click on the deploy.bat file. This will deploy this project and 
 
 # 3) Tutorial
 
-### 3.1) Structure of a message
-
-In order to extract complete answers received from the remote (both client and server side), each message has the following structure:  
-
-The begin word : [98, 105, 110, 27].  
-The message identifier (coded on 4 bytes).  
-The message header.  
-The payload length (coded on 4 bytes).  
-The payload.  
-The end word: [13, 10].  
-
-Here is the array representation of the structure :
-
-![plot](./src/main/java/resources/Protocol.png)
-
-Nota Bene: The values "+12", "+16", "+20" are indicatives values. Indeed the header and the payload length are unknown.
-
-### 3.2) Implementation
-
-The class responsible for generating messages whose structure has been previously introduced is <code>Message</code>. But the developer does not need to use directly this class. Actually, once the header structure has been defined, what really differ from one message to another is the payload. In order to generate the bytes array associated to the payload and to retrieve the payload from the bytes array, the developer needs to implement the interface <code>IMessageInterpreter</code>. It is highly recommended to have one interpreter for one specific message.  
-Those interpreters can be stored in a class that implements the <code>InterpretersFactory</code>. Finally, the developer instantiate a <code>MessageFactory</code> with the specific interpreters factory in order to generate messages to send to the remote.
-
-### 3.3) Tutorial
-
-The first interface the developer needs to implement is the <code>IHeader</code>. It is important to implement it first. As example, the header can looks like this:
+A picture is worth a thousand words, but in our case a complete example is always better than a big description to understand how easy it is to create different communication protocol and to generate an array of bytes, or parsing an array of bytes, depending on the protocol version and on the payload to send:
 
 ```java
-public class Header implements IHeader<Header> {
-	private int code;
-	private boolean isError;
-	private byte[] bytes;
+ProtocolManager manager = new ProtocolManager();
+manager.getErrorCodeFactory().register(0, "No Error");
 
-	public Header() {
-		code = -1;
-		isError = false;
-		bytes = new byte[0];
-	}
+// The request identifier
+int identifier = 1;
 
-	public Header(int code, boolean isError) {
-		this.code = code;
-		this.isError = isError;
-		bytes = ByteWrapper.create().putInt(code).put((byte) (isError ? 1 : 0)).get();
-	}
+// Registering protocol 1.0
+IProtocol protocol10 = manager.getOrCreate(1.0f);
 
-	@Override
-	public byte[] getBytes() {
-		return bytes;
-	}
+// The protocol 1.0 supports the request identifier 1
+// When an array of bytes needs to be parsed and the request identifier is 1
+// The EntityWrapperV10 will be used to parse the bytes array.
+// When data has to be sent to the remote and the latest protocol that supports
+// the identifier 1 is the protocol 1.0 then the EntityWrapperV10 will be used
+// to generate the array of bytes.
+protocol10.register(identifier, new EntityWrapperV10());
 
-	@Override
-	public int getLength() {
-		return bytes.length;
-	}
+// Getting the request associated to the latest protocol: 1.0
+IRequest request = manager.get(identifier);
 
-	@Override
-	public Header parse(byte[] buffer) {
-		ByteWrapper wrapper = ByteWrapper.wrap(buffer);
-		code = wrapper.getInt(0);
-		isError = wrapper.get(4) == 1;
-		
-		// DO NOT FORGET TO GENERATE THE BYTES ARRAY OTHERWISE THE PAYLOAD WILL NOT BE PARSED CORRECTLY
-		bytes = ByteWrapper.create().putInt(code).put((byte) (isError ? 1 : 0)).get();
-		return this;
-	}
-	
-	@Override
-	public String toString() {
-		return "code=" + code + ", isError=" + isError;
-	}
+Entity payload = new Entity("Player", "Jack", 30);
+request.setPayload(payload);
 
-	/**
-	 * @return The code associated to this header.
-	 */
-	public int getCode() {
-		return code;
-	}
+String formatter = "Request with protocol 1.0: %s";
+System.out.println(String.format(formatter, request));
 
-	/**
-	 * @return True if there is an error, false otherwise.
-	 */
-	public boolean isError() {
-		return isError;
-	}
-}
+// Simulating a request being sent to the remote
+byte[] data = request.getBytes();
+
+// Request structure:
+// Byte 0 -> 3: Protocol version number
+// Byte 4 -> 7: Request identifier
+// Byte 8 -> 11: Payload length
+// Byte 12 -> 12 + length: Payload
+formatter = "Bytes with protocol 1.0: %s";
+System.out.println(String.format(formatter, ByteWrapper.wrap(data)));
+
+// Simulating a request being received from the remote
+IRequest received = manager.parse(data);
+if (received.getIdentifier() == identifier && received.getPayload().equals(payload)) {
+	System.out.println("Received request match the sent request for protocol 1.0");
+} else
+	System.out.println("An issue occured");
+
+// Simulating an evolution of the Entity properties (field city added)
+IProtocol protocol20 = manager.getOrCreate(2.0f);
+protocol20.register(identifier, new EntityWrapperV20());
+
+// Getting the request associated to the latest protocol: 2.0
+request = manager.get(identifier);
+
+payload = new Entity("PNJ", "Davy", 60, "Sea");
+request.setPayload(payload);
+
+// Request structure:
+// Byte 0 -> 3: Protocol version number
+// Byte 4 -> 7: Request identifier
+// Byte 8 -> 11: Payload length
+// Byte 12 -> 12 + length: Payload
+formatter = "Request with protocol 2.0: %s";
+System.out.println(String.format(formatter, request));
+
+// Simulating e request being sent to the remote
+data = request.getBytes();
+
+formatter = "Bytes with protocol 2.0: %s";
+System.out.println(String.format(formatter, ByteWrapper.wrap(data)));
+
+// Simulating a request being received from the remote
+received = manager.parse(data);
+if (received.getIdentifier() == identifier && received.getPayload().equals(payload)) {
+	System.out.println("Received request match the sent request for protocol 2.0");
+} else
+	System.out.println("An issue occured");
 ```
 
-Then the developer can implement different message interpreters. There are two different interpreters :
+Output:
 
-```java
-public class PlayerNameInterpreter implements IMessageInterpreter {
-
-	@Override
-	public byte[] generate(Object[] payload) {
-		if (payload.length == 0)
-			return new byte[0];
-
-		ByteWrapper wrapper = ByteWrapper.create();
-
-		// First writing the name length, then writing the name.
-		wrapper.putString((String) payload[0], true);
-		return wrapper.get();
-	}
-
-	@Override
-	public Object[] interprete(byte[] payload) {
-		if (payload.length == 0)
-			return new Object[0];
-
-		int first = 0;
-		List<Object> informations = new ArrayList<Object>();
-		ByteWrapper wrapper = ByteWrapper.wrap(payload);
-
-		// +0: Player name length
-		int nameLength = wrapper.getInt(first);
-		first += 4;
-
-		// +4: Player name
-		String name = wrapper.getString(first, nameLength);
-		informations.add(name);
-
-		return informations.toArray();
-	}
-}
+```
+Request with protocol 1.0: {identifier=1,errorCode=[value=0,message=No Error],payload={type=Player,name=Jack,age=30,city=Not defined}}
+Bytes with protocol 1.0: [63,-128,0,0,0,0,0,1,0,0,0,0,0,0,0,6,80,108,97,121,101,114,0,0,0,4,74,97,99,107,0,0,0,30]
+Received request match the sent request for protocol 1.0
+Request with protocol 2.0: {identifier=1,errorCode=[value=0,message=No Error],payload={type=PNJ,name=Davy,age=60,city=Sea}}
+Bytes with protocol 2.0: [64,0,0,0,0,0,0,1,0,0,0,0,0,0,0,3,80,78,74,0,0,0,4,68,97,118,121,0,0,0,60,0,0,0,3,83,101,97]
+Received request match the sent request for protocol 2.0
 ```
 
-```java
-public class PlayerAgeInterpreter implements IMessageInterpreter {
-
-	@Override
-	public byte[] generate(Object[] payload) {
-		if (payload.length == 0)
-			return new byte[0];
-
-		ByteWrapper wrapper = ByteWrapper.create();
-		wrapper.putString((String) payload[0], true);
-		wrapper.putInt((int) payload[1]);
-		return wrapper.get();
-	}
-
-	@Override
-	public Object[] interprete(byte[] payload) {
-		if (payload.length == 0)
-			return new Object[0];
-
-		int first = 0;
-		List<Object> informations = new ArrayList<Object>();
-		ByteWrapper wrapper = ByteWrapper.wrap(payload);
-
-		// +0: Player name length
-		int nameLength = wrapper.getInt(first);
-		first += 4;
-
-		// +4: Player name
-		String name = wrapper.getString(first, nameLength);
-		informations.add(name);
-		first += nameLength;
-
-		// +4 +nameLength: Player age
-		int age = wrapper.getInt(first);
-		informations.add(age);
-
-		return informations.toArray();
-	}
-}
-```
-
-The next step is to store those interpreters in order to generate bytes and retrieve the payload informations:
-
-```java
-public class InterpretersFactoryImpl implements InterpretersFactory<Header> {
-	private Map<Integer, IMessageInterpreter> interpreters;
-
-	public InterpretersFactoryImpl() {
-		interpreters = new HashMap<Integer, IMessageInterpreter>();
-		interpreters.put(0, new PlayerNameInterpreter());
-		interpreters.put(1, new PlayerAgeInterpreter());
-	}
-
-	@Override
-	public IMessageInterpreter get(Header header) {
-		return interpreters.get(header.getCode());
-	}
-}
-```
-
-And finally, the developer can instantiate the message factory and use it to generate bytes:
-
-```java
-public static void main(String[] args) {
-		MessageFactory<Header> factory = new MessageFactory<>(new InterpretersFactoryImpl());
-
-		IMessage<Header> messageName = factory.create(new Header(0, false), "Player 1");
-		System.out.println(messageName);
-		System.out.println(ByteWrapper.wrap(messageName.getBytes()));
-
-		IMessage<Header> responseName = factory.parse(new Header(), messageName.getBytes());
-		System.out.println(responseName + "\n");
-
-		IMessage<Header> messageAge = factory.create(new Header(1, true), "Player 1 ", 20);
-		System.out.println(messageAge);
-		System.out.println(ByteWrapper.wrap(messageAge.getBytes()));
-
-		IMessage<Header> responseAge = factory.parse(new Header(), messageAge.getBytes());
-		System.out.println(responseAge);
-	}
-```
-
-Whose the output is:
-
-```java
-{bin,identifier={0},header={code=0, isError=false},Payload={Player 1}}
-[98,105,110,27,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,8,80,108,97,121,101,114,32,49,13,10]
-{bin,identifier={0},header={code=0, isError=false},Payload={Player 1}}
-
-{bin,identifier={1},header={code=1, isError=true},Payload={Player 1 ,20}}
-[98,105,110,27,0,0,0,1,0,0,0,1,1,0,0,0,17,0,0,0,9,80,108,97,121,101,114,32,49,32,0,0,0,20,13,10]
-{bin,identifier={1},header={code=1, isError=true},Payload={Player 1 ,20}}
-```
+The classes referenced in this example can be found in the testing folder.
