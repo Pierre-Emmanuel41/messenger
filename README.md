@@ -36,8 +36,9 @@ int identifier = 1;
 IProtocol protocol10 = manager.getOrCreate(1.0f);
 
 // The protocol 1.0 supports the request identifier 1
-// When an array of bytes needs to be parsed and the request identifier is 1
-// The EntityWrapperV10 will be used to parse the bytes array.
+// When an array of bytes needs to be parsed, the protocol version is extracted
+// and if the protocol is 1.0 and the request identifier is 1 the EntityWrapperV10
+// will be used to parse the bytes array.
 // When data has to be sent to the remote and the latest protocol that supports
 // the identifier 1 is the protocol 1.0 then the EntityWrapperV10 will be used
 // to generate the array of bytes.
@@ -72,6 +73,15 @@ if (received.getIdentifier() == identifier && received.getPayload().equals(paylo
 
 // Simulating an evolution of the Entity properties (field city added)
 IProtocol protocol20 = manager.getOrCreate(2.0f);
+
+// The protocol 2.0 supports the request identifier 1
+// When an array of bytes needs to be parsed, the protocol version is extracted
+// and if the protocol is 2.0 and the request identifier is 1 the EntityWrapperV20
+// will be used to parse the bytes array. If the protocol version is 1.0 then
+// the EntityWrapperV10 will be used.
+// When data has to be sent to the remote and the latest protocol that supports
+// the identifier 1 is the protocol 2.0 then the EntityWrapperV20 will be used
+// to generate the array of bytes.
 protocol20.register(identifier, new EntityWrapperV20());
 
 // Getting the request associated to the latest protocol: 2.0
