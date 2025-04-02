@@ -7,7 +7,6 @@ import fr.pederobien.messenger.interfaces.IAction.ActionArgs;
 import fr.pederobien.messenger.interfaces.IRequestMessage;
 import fr.pederobien.messenger.interfaces.server.IProtocolClient;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
-import fr.pederobien.protocol.interfaces.IRequest;
 import fr.pederobien.utils.event.Logger;
 
 public class MyCustomTcpProtocolClient {
@@ -72,13 +71,14 @@ public class MyCustomTcpProtocolClient {
 		// Sending a response to the client
 		IRequestMessage response = config.getRequest(Identifiers.FLOAT_ID.getValue(), 0, 3.56f);
 
+		// Response sent synchronously
 		response.setSynch(true);
 
 		// Callback to execute when a response is received from the client
-		response.setCallback(1000, arguments -> {
+		response.setCallback(2000, arguments -> {
 			if (!arguments.isTimeout()) {
-				IRequest clientResponse = config.parse(arguments.getResponse());
-				Logger.info("Server received the following response: %s", clientResponse.getPayload());
+				Object payload = config.parse(arguments.getResponse()).getPayload();
+				Logger.info("Server received the following response: %s", payload);
 			} else
 				Logger.error("[Server] Unexpected timeout occured");
 		});

@@ -1,7 +1,9 @@
 package fr.pederobien.messenger.example.client;
 
 import fr.pederobien.communication.impl.EthernetEndPoint;
+import fr.pederobien.communication.impl.layer.AesSafeLayerInitializer;
 import fr.pederobien.communication.interfaces.IEthernetEndPoint;
+import fr.pederobien.communication.testing.tools.SimpleCertificate;
 import fr.pederobien.messenger.example.Identifiers;
 import fr.pederobien.messenger.example.MyProtocols;
 import fr.pederobien.messenger.example.wrappers.Player;
@@ -23,8 +25,7 @@ public class MyCustomTcpProtocolClient {
 
 		// Setting the layer to use to pack/unpack data.
 		// A new layer is defined each time a new client is connected
-		// config.setLayerInitializer(() -> new AesLayerInitializer(new
-		// SimpleCertificate()));
+		config.setLayerInitializer(() -> new AesSafeLayerInitializer(new SimpleCertificate()));
 
 		// If the connection unstable counter reach 10, the connection will be
 		// closed automatically
@@ -108,8 +109,9 @@ public class MyCustomTcpProtocolClient {
 	public void send(float payload) {
 		IRequestMessage request = config.getRequest(Identifiers.FLOAT_ID.getValue(), 0, payload);
 
-		// Callback to execute when a response is received from the server
-		request.setCallback(1000, args -> {
+		// Callback with default timeout to execute when a response is received from the
+		// server
+		request.setCallback(args -> {
 			if (!args.isTimeout())
 				Logger.info("Client received %s", config.parse(args.getResponse()).getPayload());
 			else
@@ -127,7 +129,7 @@ public class MyCustomTcpProtocolClient {
 		request.setSynch(true);
 
 		// Callback to execute when a response is received from the server
-		request.setCallback(1000, args -> {
+		request.setCallback(2000, args -> {
 			if (!args.isTimeout()) {
 				Logger.info("Client received %s", config.parse(args.getResponse()).getPayload());
 

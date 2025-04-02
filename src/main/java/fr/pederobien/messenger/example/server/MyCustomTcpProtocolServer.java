@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.pederobien.communication.impl.EthernetEndPoint;
+import fr.pederobien.communication.impl.layer.AesSafeLayerInitializer;
 import fr.pederobien.communication.interfaces.IEthernetEndPoint;
+import fr.pederobien.communication.testing.tools.SimpleCertificate;
 import fr.pederobien.messenger.event.NewProtocolClientEvent;
 import fr.pederobien.messenger.example.MyProtocols;
 import fr.pederobien.messenger.impl.Messenger;
@@ -26,8 +28,7 @@ public class MyCustomTcpProtocolServer implements IEventListener {
 
 		// Setting the layer to use to pack/unpack data.
 		// A new layer is defined each time a new client is connected
-		// config.setLayerInitializer(() -> new AesLayerInitializer(new
-		// SimpleCertificate()));
+		config.setLayerInitializer(() -> new AesSafeLayerInitializer(new SimpleCertificate()));
 
 		// If the unstable counter reach 10, the connection will be automatically closed
 		config.setConnectionMaxUnstableCounter(10);
