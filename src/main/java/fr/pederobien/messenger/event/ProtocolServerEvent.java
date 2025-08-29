@@ -3,7 +3,7 @@ package fr.pederobien.messenger.event;
 import fr.pederobien.messenger.interfaces.server.IProtocolServer;
 
 public class ProtocolServerEvent extends MessengerEvent {
-	private IProtocolServer server;
+	private final IProtocolServer server;
 
 	/**
 	 * Creates a server event.

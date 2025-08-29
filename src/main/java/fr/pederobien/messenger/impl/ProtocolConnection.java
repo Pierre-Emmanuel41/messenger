@@ -18,7 +18,7 @@ import fr.pederobien.utils.event.EventManager;
 import fr.pederobien.utils.event.IEventListener;
 
 public class ProtocolConnection implements IProtocolConnection, IEventListener {
-	private IConnection connection;
+	private final IConnection connection;
 
 	/**
 	 * Creates a connection associated to a protocol.

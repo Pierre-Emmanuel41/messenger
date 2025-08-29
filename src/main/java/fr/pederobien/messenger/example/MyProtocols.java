@@ -1,7 +1,7 @@
 package fr.pederobien.messenger.example;
 
 import fr.pederobien.messenger.example.wrappers.FloatWrapperV20;
-import fr.pederobien.messenger.example.wrappers.IntWrapperv10;
+import fr.pederobien.messenger.example.wrappers.IntWrapperV10;
 import fr.pederobien.messenger.example.wrappers.PlayerWrapperV20;
 import fr.pederobien.messenger.example.wrappers.StringWrapperV10;
 import fr.pederobien.protocol.impl.ProtocolManager;
@@ -31,7 +31,7 @@ public class MyProtocols {
 	private static void addProtocolV10(IProtocolManager manager) {
 		IProtocol protocol = manager.getOrCreate(1.0f);
 		protocol.register(Identifiers.STRING_ID.getValue(), new StringWrapperV10());
-		protocol.register(Identifiers.INT_ID.getValue(), new IntWrapperv10());
+		protocol.register(Identifiers.INT_ID.getValue(), new IntWrapperV10());
 	}
 
 	/**

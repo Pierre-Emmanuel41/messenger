@@ -4,11 +4,11 @@ import fr.pederobien.protocol.interfaces.IWrapper;
 import fr.pederobien.utils.ByteWrapper;
 import fr.pederobien.utils.ReadableByteWrapper;
 
-public class IntWrapperv10 implements IWrapper {
+public class IntWrapperV10 implements IWrapper {
 
 	@Override
 	public byte[] getBytes(Object value) {
-		if (value == null || !(value instanceof Integer))
+		if (!(value instanceof Integer))
 			return new byte[0];
 
 		return ByteWrapper.create().putInt((int) value).get();

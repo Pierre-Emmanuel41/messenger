@@ -8,14 +8,14 @@ public class PlayerWrapperV20 implements IWrapper {
 
 	@Override
 	public byte[] getBytes(Object value) {
-		if (value == null || !(value instanceof Player))
+		if (!(value instanceof Player))
 			return new byte[0];
 
 		Player player = (Player) value;
 
 		ByteWrapper wrapper = ByteWrapper.create();
-		wrapper.putString(player.getName(), true);
-		wrapper.putInt(player.getLevel());
+		wrapper.putString(player.name(), true);
+		wrapper.putInt(player.level());
 		return wrapper.get();
 	}
 

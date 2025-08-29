@@ -4,7 +4,7 @@ public interface IProtocolConnection {
 
 	/**
 	 * @return True if the connection can send data to the remote or not. It is
-	 *         independent from the connection with the remote.
+	 *         independent of the connection with the remote.
 	 */
 	boolean isEnabled();
 
@@ -24,7 +24,7 @@ public interface IProtocolConnection {
 	void dispose();
 
 	/**
-	 * @return True if the connection is disposed and cannot be used any more.
+	 * @return True if the connection is disposed and cannot be used anymore.
 	 */
 	boolean isDisposed();
 

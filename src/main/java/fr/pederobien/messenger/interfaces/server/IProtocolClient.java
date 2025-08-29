@@ -12,7 +12,7 @@ public interface IProtocolClient {
 	void dispose();
 
 	/**
-	 * @return True if the connection is disposed and cannot be used any more.
+	 * @return True if the connection is disposed and cannot be used anymore.
 	 */
 	boolean isDisposed();
 

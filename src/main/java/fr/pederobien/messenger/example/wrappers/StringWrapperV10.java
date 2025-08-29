@@ -8,7 +8,7 @@ public class StringWrapperV10 implements IWrapper {
 
 	@Override
 	public byte[] getBytes(Object value) {
-		if (value == null | !(value instanceof String))
+		if (!(value instanceof String))
 			return new byte[0];
 
 		return ByteWrapper.create().putString((String) value, true).get();

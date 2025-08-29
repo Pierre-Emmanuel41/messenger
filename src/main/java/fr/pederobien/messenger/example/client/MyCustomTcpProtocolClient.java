@@ -15,8 +15,8 @@ import fr.pederobien.messenger.interfaces.client.IProtocolClient;
 import fr.pederobien.utils.event.Logger;
 
 public class MyCustomTcpProtocolClient {
-	private IProtocolClient client;
-	private ProtocolClientConfig<IEthernetEndPoint> config;
+	private final IProtocolClient client;
+	private final ProtocolClientConfig<IEthernetEndPoint> config;
 
 	public MyCustomTcpProtocolClient() {
 		IEthernetEndPoint endPoint = new EthernetEndPoint("127.0.0.1", 12345);
@@ -44,17 +44,17 @@ public class MyCustomTcpProtocolClient {
 		config.setAutomaticReconnection(false);
 
 		// If the client unstable counter reach 2, the connection will be
-		// closed automatically and the client will close it self.
+		// closed automatically and the client will close itself.
 		config.setClientMaxUnstableCounter(2);
 
 		// Decrement the value of the client unstable counter each 5 ms
 		config.setClientHealTime(5);
 
 		// Adding action to execute when a request has been received
-		config.register(Identifiers.STRING_ID.getValue(), args -> onStringReceived(args));
-		config.register(Identifiers.INT_ID.getValue(), args -> onIntegerReceived(args));
-		config.register(Identifiers.FLOAT_ID.getValue(), args -> onFloatReceived(args));
-		config.register(Identifiers.PLAYER_ID.getValue(), args -> onPlayerReceived(args));
+		config.register(Identifiers.STRING_ID.getValue(), this::onStringReceived);
+		config.register(Identifiers.INT_ID.getValue(), this::onIntegerReceived);
+		config.register(Identifiers.FLOAT_ID.getValue(), this::onFloatReceived);
+		config.register(Identifiers.PLAYER_ID.getValue(), this::onPlayerReceived);
 
 		// Creating the client
 		client = Messenger.createTcpClient(config);
@@ -95,7 +95,7 @@ public class MyCustomTcpProtocolClient {
 		IRequestMessage request = config.getRequest(Identifiers.INT_ID.getValue(), 0, payload);
 
 		// The request is sent synchronously
-		request.setSynch(true);
+		request.setSync(true);
 
 		// Sending request to server
 		client.getConnection().send(request);
@@ -113,9 +113,9 @@ public class MyCustomTcpProtocolClient {
 		// server
 		request.setCallback(args -> {
 			if (!args.isTimeout())
-				Logger.info("Client received %s", config.parse(args.getResponse()).getPayload());
+				Logger.info("Client received %s", config.parse(args.response()).getPayload());
 			else
-				Logger.error("[Client] Unexpected timeout occured");
+				Logger.error("[Client] Unexpected timeout occurred");
 		});
 
 		// Sending request to server
@@ -126,18 +126,18 @@ public class MyCustomTcpProtocolClient {
 		IRequestMessage request = config.getRequest(Identifiers.PLAYER_ID.getValue(), 0, player);
 
 		// The request is sent synchronously
-		request.setSynch(true);
+		request.setSync(true);
 
 		// Callback to execute when a response is received from the server
 		request.setCallback(2000, args -> {
 			if (!args.isTimeout()) {
-				Logger.info("Client received %s", config.parse(args.getResponse()).getPayload());
+				Logger.info("Client received %s", config.parse(args.response()).getPayload());
 
 				// Answering to server's answer
 				IRequestMessage response = config.getRequest(Identifiers.STRING_ID.getValue(), 0, "OK");
-				client.getConnection().answer(args.getIdentifier(), response);
+				client.getConnection().answer(args.identifier(), response);
 			} else
-				Logger.error("[Client] Unexpected timeout occured");
+				Logger.error("[Client] Unexpected timeout occurred");
 		});
 
 		// Sending request to server

@@ -30,7 +30,7 @@ public interface IRequestMessage {
 	 * 
 	 * @param isSynch True to send the request synchronously, false otherwise.
 	 */
-	void setSynch(boolean isSynch);
+	void setSync(boolean isSynch);
 
 	/**
 	 * @return The maximum time, in ms, to wait for remote response.

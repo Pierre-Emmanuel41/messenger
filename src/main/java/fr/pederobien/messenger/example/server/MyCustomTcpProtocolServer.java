@@ -2,6 +2,7 @@ package fr.pederobien.messenger.example.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import fr.pederobien.communication.impl.EthernetEndPoint;
 import fr.pederobien.communication.impl.layer.AesSafeLayerInitializer;
@@ -17,9 +18,9 @@ import fr.pederobien.utils.event.EventManager;
 import fr.pederobien.utils.event.IEventListener;
 
 public class MyCustomTcpProtocolServer implements IEventListener {
-	private IProtocolServer server;
-	private List<MyCustomTcpProtocolClient> clients;
-	private ProtocolServerConfig<IEthernetEndPoint> config;
+	private final IProtocolServer server;
+	private final List<MyCustomTcpProtocolClient> clients;
+	private final ProtocolServerConfig<IEthernetEndPoint> config;
 
 	public MyCustomTcpProtocolServer() {
 		clients = new ArrayList<MyCustomTcpProtocolClient>();
@@ -37,7 +38,7 @@ public class MyCustomTcpProtocolServer implements IEventListener {
 		config.setConnectionHealTime(100);
 
 		// Validate or not if a client is allowed to be connected to the server
-		config.setClientValidator(remoteEndPoint -> validateClient(remoteEndPoint));
+		config.setClientValidator(this::validateClient);
 
 		// If the server unstable counter reach 2, the server will be
 		// closed automatically as well as each client currently connected.
@@ -96,10 +97,6 @@ public class MyCustomTcpProtocolServer implements IEventListener {
 	 */
 	private boolean validateClient(IEthernetEndPoint endPoint) {
 		// Dummy criteria to check client end-point
-		if (endPoint.getAddress() == "127.0.0.2") {
-			return false;
-		}
-
-		return true;
-	}
+        return !Objects.equals(endPoint.getAddress(), "127.0.0.2");
+    }
 }

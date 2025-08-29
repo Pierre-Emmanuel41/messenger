@@ -52,7 +52,7 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
 	 * counter is incremented automatically. The connection max counter value is the
-	 * maximum value the unstable counter can reach before throwing an connection
+	 * maximum value the unstable counter can reach before throwing a connection
 	 * unstable event.
 	 * 
 	 * @return The maximum value the connection's unstable counter can reach.
@@ -61,7 +61,7 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
 
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
-	 * counter is incremented automatically. During the connection life time, it is
+	 * counter is incremented automatically. During the connection lifetime, it is
 	 * likely possible that the connection become unstable. However, if the
 	 * connection is stable the counter value should be 0 as no error happened for a
 	 * long time. The heal time, in milliseconds, is the time after which the
@@ -93,7 +93,7 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
 	 * counter is incremented automatically. The client max counter value is the
-	 * maximum value the unstable counter can reach before throwing an client
+	 * maximum value the unstable counter can reach before throwing a client
 	 * unstable event. This counter is incremented each time a connection unstable
 	 * event is thrown.
 	 * 
@@ -103,7 +103,7 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
 
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
-	 * counter is incremented automatically. During the connection life time, it is
+	 * counter is incremented automatically. During the connection lifetime, it is
 	 * likely possible that the connection become unstable. However, if the
 	 * connection is stable the counter value should be 0 as no error happened for a
 	 * long time. The heal time, in milliseconds, is the time after which the

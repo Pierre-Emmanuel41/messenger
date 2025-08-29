@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 import fr.pederobien.messenger.interfaces.IProtocolConnection;
 
 public class ProtocolConnectionEnableChangeEvent extends ProtocolConnectionEvent {
-	private boolean isEnabled;
+	private final boolean isEnabled;
 
 	/**
 	 * Creates a connection enable change event.

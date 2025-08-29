@@ -20,8 +20,8 @@ import fr.pederobien.utils.event.EventManager;
 import fr.pederobien.utils.event.IEventListener;
 
 public class ProtocolClient<T> implements IProtocolClient, IEventListener {
-	private IProtocolClientConfig<T> config;
-	private IClient client;
+	private final IProtocolClientConfig<T> config;
+	private final IClient client;
 	private IProtocolConnection connection;
 
 	/**
@@ -42,7 +42,7 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
 		clientConfig.setAutomaticReconnection(config.isAutomaticReconnection());
 		clientConfig.setReconnectionDelay(config.getReconnectionDelay());
 		clientConfig.setClientMaxUnstableCounter(config.getClientMaxUnstableCounter());
-		clientConfig.setMessageHandler(event -> onMessageReceived(event));
+		clientConfig.setMessageHandler(this::onMessageReceived);
 
 		client = Communication.createClient(clientConfig, impl);
 	}

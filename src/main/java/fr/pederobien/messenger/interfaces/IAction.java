@@ -2,17 +2,17 @@ package fr.pederobien.messenger.interfaces;
 
 public interface IAction {
 
-	public class ActionArgs {
-		private IProtocolConnection connection;
-		private int messageID;
-		private Object payload;
+	class ActionArgs {
+		private final IProtocolConnection connection;
+		private final int messageID;
+		private final Object payload;
 
 		/**
 		 * Creates an argument for an action to execute when an unexpected message is
 		 * received from the remote.
 		 * 
 		 * @param connection The connection that has received the unexpected message.
-		 * @param requestID  The identifier of the message received from the remote.
+		 * @param messageID  The identifier of the message received from the remote.
 		 * @param payload    The payload received from the remote.
 		 */
 		public ActionArgs(IProtocolConnection connection, int messageID, Object payload) {

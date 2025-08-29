@@ -6,7 +6,7 @@ import fr.pederobien.messenger.interfaces.server.IProtocolClient;
 import fr.pederobien.messenger.interfaces.server.IProtocolServer;
 
 public class NewProtocolClientEvent extends ProtocolServerEvent {
-	private IProtocolClient client;
+	private final IProtocolClient client;
 
 	/**
 	 * Creates an event thrown when a client is connected to the server.

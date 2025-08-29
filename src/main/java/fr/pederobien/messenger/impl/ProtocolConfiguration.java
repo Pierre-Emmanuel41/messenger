@@ -9,7 +9,7 @@ import fr.pederobien.protocol.interfaces.IProtocolManager;
 import fr.pederobien.protocol.interfaces.IRequest;
 
 public class ProtocolConfiguration implements IProtocolConfiguration {
-	private IProtocolManager manager;
+	private final IProtocolManager manager;
 
 	/**
 	 * Creates a simple configuration that gather a protocol and a list of supported
@@ -39,23 +39,23 @@ public class ProtocolConfiguration implements IProtocolConfiguration {
 	}
 
 	private class RequestMessage implements IRequestMessage {
-		private IRequest request;
-		private boolean isSynch;
+		private final IRequest request;
+		private boolean isSync;
 		private int timeout;
 		private Consumer<CallbackArgs> callback;
 
 		/**
-		 * Creates a request message ready to be sent to the remote. By default the
-		 * message is sent asynchronously, there is not callback.
+		 * Creates a request message ready to be sent to the remote. By default, the
+		 * message is sent asynchronously, there is no callback.
 		 * 
 		 * @param request The request to send to the remote.
 		 */
 		public RequestMessage(IRequest request) {
 			this.request = request;
 
-			isSynch = false;
+			isSync = false;
 			timeout = -1;
-			callback = args -> doNothing(args);
+			callback = this::doNothing;
 		}
 
 		@Override
@@ -70,12 +70,12 @@ public class ProtocolConfiguration implements IProtocolConfiguration {
 
 		@Override
 		public boolean isSync() {
-			return isSynch;
+			return isSync;
 		}
 
 		@Override
-		public void setSynch(boolean isSynch) {
-			this.isSynch = isSynch;
+		public void setSync(boolean isSync) {
+			this.isSync = isSync;
 		}
 
 		@Override

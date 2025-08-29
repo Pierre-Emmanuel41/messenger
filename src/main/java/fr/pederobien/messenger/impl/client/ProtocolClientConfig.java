@@ -12,9 +12,9 @@ import fr.pederobien.messenger.interfaces.client.IProtocolClientConfig;
 import fr.pederobien.protocol.interfaces.IProtocolManager;
 
 public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IProtocolClientConfig<T> {
-	private String name;
-	private T endPoint;
-	private Map<Integer, IAction> actions;
+	private final String name;
+	private final T endPoint;
+	private final Map<Integer, IAction> actions;
 	private Supplier<ILayerInitializer> layerInitializer;
 	private int connectionMaxUnstableCounter;
 	private int connectionHealTime;
@@ -90,7 +90,7 @@ public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IP
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
 	 * counter is incremented automatically. The connection max counter value is the
-	 * maximum value the unstable counter can reach before throwing an connection
+	 * maximum value the unstable counter can reach before throwing a connection
 	 * unstable event.
 	 * 
 	 * @param connectionMaxUnstableCounter The maximum value the connection's
@@ -107,7 +107,7 @@ public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IP
 
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
-	 * counter is incremented automatically. During the connection life time, it is
+	 * counter is incremented automatically. During the connection lifetime, it is
 	 * likely possible that the connection become unstable. However, if the
 	 * connection is stable the counter value should be 0 as no error happened for a
 	 * long time. The heal time, in milliseconds, is the time after which the
@@ -174,7 +174,7 @@ public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IP
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
 	 * counter is incremented automatically. The client max counter value is the
-	 * maximum value the unstable counter can reach before throwing an client
+	 * maximum value the unstable counter can reach before throwing a client
 	 * unstable event. This counter is incremented each time a connection unstable
 	 * event is thrown.
 	 * 
@@ -192,14 +192,11 @@ public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IP
 
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a
-	 * counter is incremented automatically. During the connection life time, it is
+	 * counter is incremented automatically. During the connection lifetime, it is
 	 * likely possible that the connection become unstable. However, if the
 	 * connection is stable the counter value should be 0 as no error happened for a
 	 * long time. The heal time, in milliseconds, is the time after which the
 	 * client's error counter is decremented.
-	 * 
-	 * @return The time, in ms, after which the client's error counter is
-	 *         decremented.
 	 */
 	public void setClientHealTime(int clientHealTime) {
 		this.clientHealTime = clientHealTime;

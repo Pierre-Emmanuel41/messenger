@@ -10,18 +10,18 @@ import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.utils.event.Logger;
 
 public class MyCustomTcpProtocolClient {
-	private IProtocolServerConfig<IEthernetEndPoint> config;
-	private IProtocolClient client;
+	private final IProtocolServerConfig<IEthernetEndPoint> config;
+	private final IProtocolClient client;
 
 	public MyCustomTcpProtocolClient(IProtocolServerConfig<IEthernetEndPoint> config, IProtocolClient client) {
 		this.config = config;
 		this.client = client;
 
 		// Adding action to execute when a request has been received
-		client.register(Identifiers.STRING_ID.getValue(), args -> onStringReceived(args));
-		client.register(Identifiers.INT_ID.getValue(), args -> onIntegerReceived(args));
-		client.register(Identifiers.FLOAT_ID.getValue(), args -> onFloatReceived(args));
-		client.register(Identifiers.PLAYER_ID.getValue(), args -> onPlayerReceived(args));
+		client.register(Identifiers.STRING_ID.getValue(), this::onStringReceived);
+		client.register(Identifiers.INT_ID.getValue(), this::onIntegerReceived);
+		client.register(Identifiers.FLOAT_ID.getValue(), this::onFloatReceived);
+		client.register(Identifiers.PLAYER_ID.getValue(), this::onPlayerReceived);
 	}
 
 	private void onStringReceived(ActionArgs args) {
@@ -54,7 +54,7 @@ public class MyCustomTcpProtocolClient {
 		IRequestMessage response = config.getRequest(Identifiers.FLOAT_ID.getValue(), 0, 1.0f);
 
 		// Response sent synchronously
-		response.setSynch(true);
+		response.setSync(true);
 
 		// Answering to client request
 		client.getConnection().answer(args.getMessageID(), response);
@@ -72,15 +72,15 @@ public class MyCustomTcpProtocolClient {
 		IRequestMessage response = config.getRequest(Identifiers.FLOAT_ID.getValue(), 0, 3.56f);
 
 		// Response sent synchronously
-		response.setSynch(true);
+		response.setSync(true);
 
 		// Callback to execute when a response is received from the client
 		response.setCallback(2000, arguments -> {
 			if (!arguments.isTimeout()) {
-				Object payload = config.parse(arguments.getResponse()).getPayload();
+				Object payload = config.parse(arguments.response()).getPayload();
 				Logger.info("Server received the following response: %s", payload);
 			} else
-				Logger.error("[Server] Unexpected timeout occured");
+				Logger.error("[Server] Unexpected timeout occurred");
 		});
 
 		// Answering to client request

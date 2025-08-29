@@ -8,7 +8,7 @@ public class FloatWrapperV20 implements IWrapper {
 
 	@Override
 	public byte[] getBytes(Object value) {
-		if (value == null || !(value instanceof Float))
+		if (!(value instanceof Float))
 			return new byte[0];
 
 		return ByteWrapper.create().putFloat((float) value).get();

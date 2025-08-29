@@ -19,6 +19,6 @@ public class ProtocolClientUnstableEvent extends ProtocolClientEvent {
 	public String toString() {
 		StringJoiner joiner = new StringJoiner(",", "{", "}");
 		joiner.add("client=" + getClient());
-		return super.toString();
+		return String.format("%s_%s", getName(), joiner);
 	}
 }

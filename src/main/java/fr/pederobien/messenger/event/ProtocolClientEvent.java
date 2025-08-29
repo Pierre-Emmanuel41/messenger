@@ -3,7 +3,7 @@ package fr.pederobien.messenger.event;
 import fr.pederobien.messenger.interfaces.client.IProtocolClient;
 
 public class ProtocolClientEvent extends MessengerEvent {
-	private IProtocolClient client;
+	private final IProtocolClient client;
 
 	/**
 	 * Creates a client event.

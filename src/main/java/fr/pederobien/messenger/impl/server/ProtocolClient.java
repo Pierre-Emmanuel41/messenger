@@ -14,9 +14,9 @@ import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.protocol.interfaces.IRequest;
 
 public class ProtocolClient implements IProtocolClient {
-	private IProtocolServerConfig<?> config;
-	private IProtocolConnection connection;
-	private Map<Integer, IAction> actions;
+	private final IProtocolServerConfig<?> config;
+	private final IProtocolConnection connection;
+	private final Map<Integer, IAction> actions;
 
 	/**
 	 * Creates a client, on server side, associated to a protocol and connected to a
@@ -30,7 +30,7 @@ public class ProtocolClient implements IProtocolClient {
 		this.config = config;
 		this.connection = new ProtocolConnection(connection);
 
-		connection.setMessageHandler(event -> onMessageReceived(event));
+		connection.setMessageHandler(this::onMessageReceived);
 
 		actions = new HashMap<Integer, IAction>();
 	}

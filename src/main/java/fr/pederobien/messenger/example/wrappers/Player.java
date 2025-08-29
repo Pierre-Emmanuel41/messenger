@@ -1,31 +1,28 @@
 package fr.pederobien.messenger.example.wrappers;
 
-public class Player {
-	private String name;
-	private int level;
-
+public record Player(String name, int level) {
 	/**
 	 * Creates a new player with the specific name and level.
-	 * 
+	 *
 	 * @param name  The player name.
 	 * @param level The player experience level.
 	 */
-	public Player(String name, int level) {
-		this.name = name;
-		this.level = level;
+	public Player {
 	}
 
 	/**
 	 * @return The player name.
 	 */
-	public String getName() {
+	@Override
+	public String name() {
 		return name;
 	}
 
 	/**
 	 * @return The player experience level.
 	 */
-	public int getLevel() {
+	@Override
+	public int level() {
 		return level;
 	}
 

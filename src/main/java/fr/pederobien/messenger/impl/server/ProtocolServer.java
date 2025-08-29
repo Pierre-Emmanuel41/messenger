@@ -21,8 +21,8 @@ import fr.pederobien.utils.event.EventManager;
 import fr.pederobien.utils.event.IEventListener;
 
 public class ProtocolServer<T> implements IProtocolServer, IEventListener {
-	private IProtocolServerConfig<T> config;
-	private IServer server;
+	private final IProtocolServerConfig<T> config;
+	private final IServer server;
 
 	/**
 	 * Creates a server associated to a protocol.
