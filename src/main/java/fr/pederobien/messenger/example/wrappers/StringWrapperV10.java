@@ -6,18 +6,18 @@ import fr.pederobien.utils.ReadableByteWrapper;
 
 public class StringWrapperV10 implements IWrapper {
 
-	@Override
-	public byte[] getBytes(Object value) {
-		if (!(value instanceof String))
-			return new byte[0];
+    @Override
+    public byte[] getBytes(Object value) {
+        if (!(value instanceof String))
+            return new byte[0];
 
-		return ByteWrapper.create().putString((String) value, true).get();
-	}
+        return ByteWrapper.create().putString((String) value, true).get();
+    }
 
-	@Override
-	public Object parse(byte[] bytes) {
-		ReadableByteWrapper wrapper = ReadableByteWrapper.wrap(bytes);
+    @Override
+    public Object parse(byte[] bytes) {
+        ReadableByteWrapper wrapper = ReadableByteWrapper.wrap(bytes);
 
-		return wrapper.nextString(wrapper.nextInt());
-	}
+        return wrapper.nextString(wrapper.nextInt());
+    }
 }

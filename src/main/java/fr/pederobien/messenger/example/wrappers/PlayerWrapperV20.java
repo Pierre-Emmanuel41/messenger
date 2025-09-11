@@ -6,29 +6,29 @@ import fr.pederobien.utils.ReadableByteWrapper;
 
 public class PlayerWrapperV20 implements IWrapper {
 
-	@Override
-	public byte[] getBytes(Object value) {
-		if (!(value instanceof Player))
-			return new byte[0];
+    @Override
+    public byte[] getBytes(Object value) {
+        if (!(value instanceof Player))
+            return new byte[0];
 
-		Player player = (Player) value;
+        Player player = (Player) value;
 
-		ByteWrapper wrapper = ByteWrapper.create();
-		wrapper.putString(player.name(), true);
-		wrapper.putInt(player.level());
-		return wrapper.get();
-	}
+        ByteWrapper wrapper = ByteWrapper.create();
+        wrapper.putString(player.name(), true);
+        wrapper.putInt(player.level());
+        return wrapper.get();
+    }
 
-	@Override
-	public Object parse(byte[] bytes) {
-		ReadableByteWrapper wrapper = ReadableByteWrapper.wrap(bytes);
+    @Override
+    public Object parse(byte[] bytes) {
+        ReadableByteWrapper wrapper = ReadableByteWrapper.wrap(bytes);
 
-		// Player name
-		String name = wrapper.nextString(wrapper.nextInt());
+        // Player name
+        String name = wrapper.nextString(wrapper.nextInt());
 
-		// Player experience level
-		int level = wrapper.nextInt();
+        // Player experience level
+        int level = wrapper.nextInt();
 
-		return new Player(name, level);
-	}
+        return new Player(name, level);
+    }
 }

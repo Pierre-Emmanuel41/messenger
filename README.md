@@ -1,7 +1,8 @@
 # 1) Presentation
 
-This project propose an easy way to define how data can be exchanged between a client and a server and preserve backward compatibility using protocol versions. The goal of this project is to be used with the [communication](https://github.com/Pierre-Emmanuel41/communication) project.
-
+This project propose an easy way to define how data can be exchanged between a client and a server and preserve backward
+compatibility using protocol versions. The goal of this project is to be used with
+the [communication](https://github.com/Pierre-Emmanuel41/communication) project.
 
 # 2) Download and compilation
 
@@ -11,7 +12,8 @@ First you need to download this project on your computer. To do so, you can use 
 git clone https://github.com/Pierre-Emmanuel41/messenger.git
 ```
 
-Executing the batch file <code>deploy.bat</code> will download each dependency and build everything. Finally, you can add the project as maven dependency to your maven project :
+Executing the batch file <code>deploy.bat</code> will download each dependency and build everything. Finally, you can
+add the project as maven dependency to your maven project :
 
 ```xml
 <dependency>
@@ -23,11 +25,17 @@ Executing the batch file <code>deploy.bat</code> will download each dependency a
 
 # 3) Tutorial
 
-A picture is worth a thousand words, but in our case a complete example is always better than a big description to understand how easy it is to create different communication protocol and to generate an array of bytes, or parsing an array of bytes, depending on the protocol version and on the payload to send:
+A picture is worth a thousand words, but in our case a complete example is always better than a big description to
+understand how easy it is to create different communication protocol and to generate an array of bytes, or parsing an
+array of bytes, depending on the protocol version and on the payload to send:
 
 ```java
 ProtocolManager manager = new ProtocolManager();
-manager.getErrorCodeFactory().register(0, "No Error");
+manager.
+
+getErrorCodeFactory().
+
+register(0,"No Error");
 
 // The request identifier
 int identifier = 1;
@@ -42,16 +50,22 @@ IProtocol protocol10 = manager.getOrCreate(1.0f);
 // When data has to be sent to the remote and the latest protocol that supports
 // the identifier 1 is the protocol 1.0 then the EntityWrapperV10 will be used
 // to generate the array of bytes.
-protocol10.register(identifier, new EntityWrapperV10());
+protocol10.
+
+register(identifier, new EntityWrapperV10());
 
 // Getting the request associated to the latest protocol: 1.0
 IRequest request = manager.get(identifier);
 
 Entity payload = new Entity("Player", "Jack", 30);
-request.setPayload(payload);
+request.
+
+setPayload(payload);
 
 String formatter = "Request with protocol 1.0: %s";
-System.out.println(String.format(formatter, request));
+System.out.
+
+println(String.format(formatter, request));
 
 // Simulating a request being sent to the remote
 byte[] data = request.getBytes();
@@ -61,15 +75,27 @@ byte[] data = request.getBytes();
 // Byte 4 -> 7: Request identifier
 // Byte 8 -> 11: Payload length
 // Byte 12 -> 12 + length: Payload
-formatter = "Bytes with protocol 1.0: %s";
-System.out.println(String.format(formatter, ByteWrapper.wrap(data)));
+formatter ="Bytes with protocol 1.0: %s";
+        System.out.
+
+println(String.format(formatter, ByteWrapper.wrap(data)));
 
 // Simulating a request being received from the remote
 IRequest received = manager.parse(data);
-if (received.getIdentifier() == identifier && received.getPayload().equals(payload)) {
-	System.out.println("Received request match the sent request for protocol 1.0");
-} else
-	System.out.println("An issue occured");
+if(received.
+
+getIdentifier() ==identifier &&received.
+
+getPayload().
+
+equals(payload)){
+        System.out.
+
+println("Received request match the sent request for protocol 1.0");
+}else
+        System.out.
+
+println("An issue occured");
 
 // Simulating an evolution of the Entity properties (field city added)
 IProtocol protocol20 = manager.getOrCreate(2.0f);
@@ -82,34 +108,60 @@ IProtocol protocol20 = manager.getOrCreate(2.0f);
 // When data has to be sent to the remote and the latest protocol that supports
 // the identifier 1 is the protocol 2.0 then the EntityWrapperV20 will be used
 // to generate the array of bytes.
-protocol20.register(identifier, new EntityWrapperV20());
+protocol20.
+
+register(identifier, new EntityWrapperV20());
 
 // Getting the request associated to the latest protocol: 2.0
-request = manager.get(identifier);
+request =manager.
 
-payload = new Entity("PNJ", "Davy", 60, "Sea");
-request.setPayload(payload);
+get(identifier);
+
+payload =new
+
+Entity("PNJ","Davy",60,"Sea");
+request.
+
+setPayload(payload);
 
 // Request structure:
 // Byte 0 -> 3: Protocol version number
 // Byte 4 -> 7: Request identifier
 // Byte 8 -> 11: Payload length
 // Byte 12 -> 12 + length: Payload
-formatter = "Request with protocol 2.0: %s";
-System.out.println(String.format(formatter, request));
+formatter ="Request with protocol 2.0: %s";
+        System.out.
+
+println(String.format(formatter, request));
 
 // Simulating e request being sent to the remote
-data = request.getBytes();
+data =request.
 
-formatter = "Bytes with protocol 2.0: %s";
-System.out.println(String.format(formatter, ByteWrapper.wrap(data)));
+getBytes();
+
+formatter ="Bytes with protocol 2.0: %s";
+        System.out.
+
+println(String.format(formatter, ByteWrapper.wrap(data)));
 
 // Simulating a request being received from the remote
-received = manager.parse(data);
-if (received.getIdentifier() == identifier && received.getPayload().equals(payload)) {
-	System.out.println("Received request match the sent request for protocol 2.0");
-} else
-	System.out.println("An issue occured");
+received =manager.
+
+parse(data);
+if(received.
+
+getIdentifier() ==identifier &&received.
+
+getPayload().
+
+equals(payload)){
+        System.out.
+
+println("Received request match the sent request for protocol 2.0");
+}else
+        System.out.
+
+println("An issue occured");
 ```
 
 Output:

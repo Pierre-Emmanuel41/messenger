@@ -6,16 +6,16 @@ import fr.pederobien.utils.ReadableByteWrapper;
 
 public class FloatWrapperV20 implements IWrapper {
 
-	@Override
-	public byte[] getBytes(Object value) {
-		if (!(value instanceof Float))
-			return new byte[0];
+    @Override
+    public byte[] getBytes(Object value) {
+        if (!(value instanceof Float))
+            return new byte[0];
 
-		return ByteWrapper.create().putFloat((float) value).get();
-	}
+        return ByteWrapper.create().putFloat((float) value).get();
+    }
 
-	@Override
-	public Object parse(byte[] bytes) {
-		return ReadableByteWrapper.wrap(bytes).nextFloat();
-	}
+    @Override
+    public Object parse(byte[] bytes) {
+        return ReadableByteWrapper.wrap(bytes).nextFloat();
+    }
 }
