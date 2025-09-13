@@ -4,20 +4,18 @@ import fr.pederobien.protocol.interfaces.IWrapper;
 import fr.pederobien.utils.ByteWrapper;
 import fr.pederobien.utils.ReadableByteWrapper;
 
-public class StringWrapperV10 implements IWrapper {
+public class IntWrapperV10 implements IWrapper {
 
     @Override
     public byte[] getBytes(Object value) {
-        if (!(value instanceof String))
+        if (!(value instanceof Integer))
             return new byte[0];
 
-        return ByteWrapper.create().putString((String) value, true).get();
+        return ByteWrapper.create().putInt((int) value).get();
     }
 
     @Override
     public Object parse(byte[] bytes) {
-        ReadableByteWrapper wrapper = ReadableByteWrapper.wrap(bytes);
-
-        return wrapper.nextString(wrapper.nextInt());
+        return ReadableByteWrapper.wrap(bytes).nextInt();
     }
 }
