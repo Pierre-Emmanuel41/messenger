@@ -1,8 +1,10 @@
 # 1) Presentation
 
-This project propose an easy way to define how data can be exchanged between a client and a server and preserve backward
-compatibility using protocol versions. The goal of this project is to be used with
-the [communication](https://github.com/Pierre-Emmanuel41/communication) project.
+This project gather features to easily transfer data from a client to a server or vice versa. this project is based on
+the [communication](https://github.com/Pierre-Emmanuel41/communication) project which gives you the possibility
+to have the control on how data are exchanged on the lowest level, and on
+[protocol](https://github.com/Pierre-Emmanuel41/protocol) project which propose a layout for requests so that the clients
+and the server can understand each other.
 
 # 2) Download and compilation
 
@@ -16,163 +18,130 @@ Executing the batch file <code>deploy.bat</code> will download each dependency a
 add the project as maven dependency to your maven project :
 
 ```xml
+
 <dependency>
-	<groupId>fr.pederobien</groupId>
-	<artifactId>messenger</artifactId>
-	<version>2.0-SNAPSHOT</version>
+    <groupId>fr.pederobien</groupId>
+    <artifactId>messenger</artifactId>
+    <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
 
 # 3) Tutorial
 
-A picture is worth a thousand words, but in our case a complete example is always better than a big description to
-understand how easy it is to create different communication protocol and to generate an array of bytes, or parsing an
-array of bytes, depending on the protocol version and on the payload to send:
+Before creating a client, you will need a client configuration. There are several parameters you can set:
+* The layer, ie the lowest level to structure the bytes array to send to the server
+* The maximum value of the connection unstable counter (used to prevent from having a crazy connection stuck in an
+infinite loop)
+* The time after which the connection unstable counter shall be decreased
+* The time after which a timeout occurs when trying to connect to the server
+* The time after which the connection can retry to connect to the server
+* The automatic reconnection flag to indicate if the client can automatically reconnect to the server
+* The maximum value of the client unstable counter (used to prevent from having a crazy client stuck in an infinite loop)
+* The time after which the client unstable counter shall be decreased
+* All requests supported by the client.
+
+Please see below how to create a client configuration:
 
 ```java
-ProtocolManager manager = new ProtocolManager();
-manager.
+// In our case we will use an ethernet implementation so the server end point is defined by the IP address and the port number
+IEthernetEndPoint endPoint = new EthernetEndPoint("127.0.0.1", 12345);
 
-getErrorCodeFactory().
+// The protocol manager gather different protocol versions
+// Please see the class MyProtocolManager in folder example/MyProtocolManager
+config = Messenger.createClientConfig(MyProtocolManager.getInstance(), "My TCP client", endPoint);
 
-register(0,"No Error");
+// Setting the layer to use to pack/unpack data.
+config.setLayerInitializer(() -> new AesSafeLayerInitializer(new SimpleCertificate()));
 
-// The request identifier
-int identifier = 1;
+// If the connection unstable counter reach 10, the connection will be
+// closed automatically
+config.setConnectionMaxUnstableCounter(10);
 
-// Registering protocol 1.0
-IProtocol protocol10 = manager.getOrCreate(1.0f);
+// Decrement the value of the connection unstable counter each 100 ms
+config.setConnectionHealTime(100);
 
-// The protocol 1.0 supports the request identifier 1
-// When an array of bytes needs to be parsed, the protocol version is extracted
-// and if the protocol is 1.0 and the request identifier is 1 the EntityWrapperV10
-// will be used to parse the bytes array.
-// When data has to be sent to the remote and the latest protocol that supports
-// the identifier 1 is the protocol 1.0 then the EntityWrapperV10 will be used
-// to generate the array of bytes.
-protocol10.
+// Time in ms after which a timeout occurs when trying to connect to the server
+config.setConnectionTimeout(5000);
 
-register(identifier, new EntityWrapperV10());
+// The connection wait 1000 ms before retrying to connect with the server
+config.setReconnectionDelay(1000);
 
-// Getting the request associated to the latest protocol: 1.0
-IRequest request = manager.get(identifier);
+// Value by default is true
+config.setAutomaticReconnection(false);
 
-Entity payload = new Entity("Player", "Jack", 30);
-request.
+// If the client unstable counter reach 2, the connection will be
+// closed automatically and the client will close itself.
+config.setClientMaxUnstableCounter(2);
 
-setPayload(payload);
+// Decrement the value of the client unstable counter each 5 ms
+config.setClientHealTime(5);
 
-String formatter = "Request with protocol 1.0: %s";
-System.out.
+// Adding action to execute when a request has been received
+config.addRequestHandler(Identifiers.STRING_ID.getValue(), this::onStringReceived);
+config.addRequestHandler(Identifiers.INT_ID.getValue(), this::onIntegerReceived);
+config.addRequestHandler(Identifiers.FLOAT_ID.getValue(), this::onFloatReceived);
+config.addRequestHandler(Identifiers.PLAYER_ID.getValue(), this::onPlayerReceived);
 
-println(String.format(formatter, request));
-
-// Simulating a request being sent to the remote
-byte[] data = request.getBytes();
-
-// Request structure:
-// Byte 0 -> 3: Protocol version number
-// Byte 4 -> 7: Request identifier
-// Byte 8 -> 11: Payload length
-// Byte 12 -> 12 + length: Payload
-formatter ="Bytes with protocol 1.0: %s";
-        System.out.
-
-println(String.format(formatter, ByteWrapper.wrap(data)));
-
-// Simulating a request being received from the remote
-IRequest received = manager.parse(data);
-if(received.
-
-getIdentifier() ==identifier &&received.
-
-getPayload().
-
-equals(payload)){
-        System.out.
-
-println("Received request match the sent request for protocol 1.0");
-}else
-        System.out.
-
-println("An issue occured");
-
-// Simulating an evolution of the Entity properties (field city added)
-IProtocol protocol20 = manager.getOrCreate(2.0f);
-
-// The protocol 2.0 supports the request identifier 1
-// When an array of bytes needs to be parsed, the protocol version is extracted
-// and if the protocol is 2.0 and the request identifier is 1 the EntityWrapperV20
-// will be used to parse the bytes array. If the protocol version is 1.0 then
-// the EntityWrapperV10 will be used.
-// When data has to be sent to the remote and the latest protocol that supports
-// the identifier 1 is the protocol 2.0 then the EntityWrapperV20 will be used
-// to generate the array of bytes.
-protocol20.
-
-register(identifier, new EntityWrapperV20());
-
-// Getting the request associated to the latest protocol: 2.0
-request =manager.
-
-get(identifier);
-
-payload =new
-
-Entity("PNJ","Davy",60,"Sea");
-request.
-
-setPayload(payload);
-
-// Request structure:
-// Byte 0 -> 3: Protocol version number
-// Byte 4 -> 7: Request identifier
-// Byte 8 -> 11: Payload length
-// Byte 12 -> 12 + length: Payload
-formatter ="Request with protocol 2.0: %s";
-        System.out.
-
-println(String.format(formatter, request));
-
-// Simulating e request being sent to the remote
-data =request.
-
-getBytes();
-
-formatter ="Bytes with protocol 2.0: %s";
-        System.out.
-
-println(String.format(formatter, ByteWrapper.wrap(data)));
-
-// Simulating a request being received from the remote
-received =manager.
-
-parse(data);
-if(received.
-
-getIdentifier() ==identifier &&received.
-
-getPayload().
-
-equals(payload)){
-        System.out.
-
-println("Received request match the sent request for protocol 2.0");
-}else
-        System.out.
-
-println("An issue occured");
+// Creating the client
+client = Messenger.createTcpClient(config);
 ```
 
-Output:
+The code above can be encapsulated in your own client class, see
+[this client](https://github.com/Pierre-Emmanuel41/messenger/blob/master/src/main/java/fr/pederobien/messenger/example/client/MyCustomTcpProtocolClient.java)
 
-```
-Request with protocol 1.0: {identifier=1,errorCode=[value=0,message=No Error],payload={type=Player,name=Jack,age=30,city=Not defined}}
-Bytes with protocol 1.0: [63,-128,0,0,0,0,0,1,0,0,0,0,0,0,0,6,80,108,97,121,101,114,0,0,0,4,74,97,99,107,0,0,0,30]
-Received request match the sent request for protocol 1.0
-Request with protocol 2.0: {identifier=1,errorCode=[value=0,message=No Error],payload={type=PNJ,name=Davy,age=60,city=Sea}}
-Bytes with protocol 2.0: [64,0,0,0,0,0,0,1,0,0,0,0,0,0,0,3,80,78,74,0,0,0,4,68,97,118,121,0,0,0,60,0,0,0,3,83,101,97]
-Received request match the sent request for protocol 2.0
+
+Similarly, you have to create a server configuration before creating a server, There are several parameters you can set:
+* The layer, ie the lowest level to structure the bytes array to send to the client
+* The maximum value of the client connection unstable counter (used to prevent from having a crazy client connection stuck
+in an infinite loop)
+* The time after which the client connection unstable counter shall be decreased
+* The client validator based on the client end point properties (can be used to blacklist IP address for example)
+* The maximum value of the server unstable counter (incremented when an error happened when a new client connects)
+* The time after which the server unstable counter shall be decreased
+
+Please see below how to create a server configuration:
+
+```java
+// The protocol manager gather different protocol versions
+// Please see the class MyProtocolManager in folder example/MyProtocolManager
+config = Messenger.createServerConfig(MyProtocolManager.getInstance(), "My TCP server", new EthernetEndPoint(12345));
+
+// Setting the layer to use to pack/unpack data.
+// A new layer is defined each time a new client is connected
+config.setLayerInitializer(() -> new AesSafeLayerInitializer(new SimpleCertificate()));
+
+// If the unstable counter reach 10, the connection will be automatically closed
+config.setConnectionMaxUnstableCounter(10);
+
+// Decrement the value of the unstable counter each 100 ms
+config.setConnectionHealTime(100);
+
+// Validate or not if a client is allowed to be connected to the server
+config.setClientValidator(this::validateClient);
+
+// If the server unstable counter reach 2, the server will be
+// closed automatically as well as each client currently connected.
+config.setServerMaxUnstableCounter(2);
+
+// Decrement the value of the server unstable counter each 5 ms
+config.setServerHealTime(5);
+
+server = Messenger.createTcpServer(config);
 ```
 
-The classes referenced in this example can be found in the testing folder.
+The code above can be encapsulated in your own server class, see
+[this server](https://github.com/Pierre-Emmanuel41/messenger/blob/master/src/main/java/fr/pederobien/messenger/example/server/MyCustomTcpProtocolServer.java)
+
+Finally, when a client is allowed to connect to the server, the server creates the associated MyCustomTcpProtocolClient,
+but on the server side. The custom client set all the request the client supports:
+
+```java
+// Adding action to execute when a request has been received
+client.addRequestHandler(Identifiers.STRING_ID.getValue(), this::onStringReceived);
+client.addRequestHandler(Identifiers.INT_ID.getValue(), this::onIntegerReceived);
+client.addRequestHandler(Identifiers.FLOAT_ID.getValue(), this::onFloatReceived);
+client.addRequestHandler(Identifiers.PLAYER_ID.getValue(), this::onPlayerReceived);
+```
+
+The client implementation, on server side, can be encapsulated in your own client class, see
+[this client](https://github.com/Pierre-Emmanuel41/messenger/blob/master/src/main/java/fr/pederobien/messenger/example/server/MyCustomTcpProtocolClient.java)

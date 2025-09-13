@@ -24,7 +24,6 @@ public class MyCustomTcpProtocolClient {
         config = Messenger.createClientConfig(MyProtocolManager.getInstance(), "My TCP client", endPoint);
 
         // Setting the layer to use to pack/unpack data.
-        // A new layer is defined each time a new client is connected
         config.setLayerInitializer(() -> new AesSafeLayerInitializer(new SimpleCertificate()));
 
         // If the connection unstable counter reach 10, the connection will be
