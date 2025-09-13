@@ -5,6 +5,7 @@ import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.messenger.impl.ProtocolConfiguration;
 import fr.pederobien.messenger.interfaces.IRequestHandler;
 import fr.pederobien.messenger.interfaces.client.IProtocolClientConfig;
+import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IProtocolManager;
 
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import java.util.function.Supplier;
 public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IProtocolClientConfig<T> {
     private final String name;
     private final T endPoint;
-    private final Map<Integer, IRequestHandler> handlers;
+    private final Map<IIdentifier, IRequestHandler> handlers;
     private Supplier<ILayerInitializer> layerInitializer;
     private int connectionMaxUnstableCounter;
     private int connectionHealTime;
@@ -37,7 +38,7 @@ public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IP
         this.name = name;
         this.endPoint = endPoint;
 
-        handlers = new HashMap<Integer, IRequestHandler>();
+        handlers = new HashMap<IIdentifier, IRequestHandler>();
         layerInitializer = () -> new LayerInitializer();
         connectionMaxUnstableCounter = 10;
         connectionHealTime = 1000;
@@ -59,12 +60,12 @@ public class ProtocolClientConfig<T> extends ProtocolConfiguration implements IP
     }
 
     @Override
-    public void addRequestHandler(int identifier, IRequestHandler handler) {
+    public void addRequestHandler(IIdentifier identifier, IRequestHandler handler) {
         handlers.put(identifier, handler);
     }
 
     @Override
-    public IRequestHandler getHandler(int identifier) {
+    public IRequestHandler getHandler(IIdentifier identifier) {
         return handlers.get(identifier);
     }
 

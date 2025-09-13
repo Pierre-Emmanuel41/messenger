@@ -5,13 +5,18 @@ import fr.pederobien.communication.impl.layer.AesSafeLayerInitializer;
 import fr.pederobien.communication.interfaces.IEthernetEndPoint;
 import fr.pederobien.communication.testing.tools.SimpleCertificate;
 import fr.pederobien.messenger.event.NewProtocolClientEvent;
+import fr.pederobien.messenger.example.Errors;
 import fr.pederobien.messenger.example.MyProtocolManager;
 import fr.pederobien.messenger.impl.Messenger;
 import fr.pederobien.messenger.impl.server.ProtocolServerConfig;
+import fr.pederobien.messenger.interfaces.IProtocolConnection;
+import fr.pederobien.messenger.interfaces.server.IProtocolClient;
 import fr.pederobien.messenger.interfaces.server.IProtocolServer;
+import fr.pederobien.protocol.interfaces.IRequest;
 import fr.pederobien.utils.event.EventHandler;
 import fr.pederobien.utils.event.EventManager;
 import fr.pederobien.utils.event.IEventListener;
+import fr.pederobien.utils.event.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +45,18 @@ public class MyCustomTcpProtocolServer implements IEventListener {
         // Validate or not if a client is allowed to be connected to the server
         config.setClientValidator(this::validateClient);
 
+        // Default privilege level when a client connects, by default it's 5
+        config.setPrivilege(3);
+
         // If the server unstable counter reach 2, the server will be
         // closed automatically as well as each client currently connected.
         config.setServerMaxUnstableCounter(2);
 
         // Decrement the value of the server unstable counter each 5 ms
         config.setServerHealTime(5);
+
+        // Server behaviour when a request is denied
+        config.setDeniedRequestHandler(this::onRequestDenied);
 
         server = Messenger.createTcpServer(config);
 
@@ -97,5 +108,18 @@ public class MyCustomTcpProtocolServer implements IEventListener {
     private boolean validateClient(IEthernetEndPoint endPoint) {
         // Dummy criteria to check client end-point
         return !Objects.equals(endPoint.getAddress(), "127.0.0.2");
+    }
+
+    /**
+     * Server behaviour when the client's privilege level is not high enough to process the received request.
+     *
+     * @param connection The connection used to respond to the client.
+     * @param messageID  The identifier of the received request.
+     * @param request    The received request.
+     */
+    private void onRequestDenied(IProtocolConnection connection, int messageID, IProtocolClient client, int requestPrivilege, IRequest request) {
+        String formatter = "%s Request Denied (Client's privilege level: %s, request's privilege level: %s, request content: %s)";
+        Logger.info(formatter, server, client.getPrivilege(), requestPrivilege, request);
+        connection.answer(messageID, config.getRequest(request.getIdentifier(), Errors.REQUEST_DENIED, null));
     }
 }

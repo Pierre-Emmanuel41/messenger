@@ -26,12 +26,14 @@ public class MyProtocolManager {
 
         static {
             IProtocol protocol = INSTANCE.getOrCreate(1.0f);
-            protocol.register(Identifiers.STRING_ID.getValue(), new StringWrapperV10());
-            protocol.register(Identifiers.INT_ID.getValue(), new IntWrapperV10());
+            protocol.register(Identifiers.STRING_ID, new StringWrapperV10());
+            protocol.register(Identifiers.INT_ID, new IntWrapperV10());
 
             protocol = INSTANCE.getOrCreate(2.0f);
-            protocol.register(Identifiers.FLOAT_ID.getValue(), new FloatWrapperV20());
-            protocol.register(Identifiers.PLAYER_ID.getValue(), new PlayerWrapperV20());
+            protocol.register(Identifiers.FLOAT_ID, new FloatWrapperV20());
+            protocol.register(Identifiers.PLAYER_ID, new PlayerWrapperV20());
+
+            INSTANCE.registerErrors(Errors.values());
         }
     }
 }

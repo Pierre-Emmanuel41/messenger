@@ -1,6 +1,8 @@
 package fr.pederobien.messenger.interfaces;
 
 import fr.pederobien.communication.interfaces.connection.ICallback.CallbackArgs;
+import fr.pederobien.protocol.interfaces.IError;
+import fr.pederobien.protocol.interfaces.IIdentifier;
 
 import java.util.function.Consumer;
 
@@ -14,12 +16,12 @@ public interface IRequestMessage {
     /**
      * @return The request identifier.
      */
-    int getIdentifier();
+    IIdentifier getIdentifier();
 
     /**
      * @return The request error code value.
      */
-    int getErrorCode();
+    IError getError();
 
     /**
      * @return The payload object of this request.

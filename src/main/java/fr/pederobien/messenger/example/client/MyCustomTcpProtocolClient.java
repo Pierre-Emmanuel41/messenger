@@ -4,6 +4,7 @@ import fr.pederobien.communication.impl.EthernetEndPoint;
 import fr.pederobien.communication.impl.layer.AesSafeLayerInitializer;
 import fr.pederobien.communication.interfaces.IEthernetEndPoint;
 import fr.pederobien.communication.testing.tools.SimpleCertificate;
+import fr.pederobien.messenger.example.Errors;
 import fr.pederobien.messenger.example.Identifiers;
 import fr.pederobien.messenger.example.MyProtocolManager;
 import fr.pederobien.messenger.example.wrappers.Player;
@@ -12,6 +13,7 @@ import fr.pederobien.messenger.impl.client.ProtocolClientConfig;
 import fr.pederobien.messenger.interfaces.IProtocolConnection;
 import fr.pederobien.messenger.interfaces.IRequestMessage;
 import fr.pederobien.messenger.interfaces.client.IProtocolClient;
+import fr.pederobien.protocol.interfaces.IRequest;
 import fr.pederobien.utils.event.Logger;
 
 public class MyCustomTcpProtocolClient {
@@ -50,10 +52,10 @@ public class MyCustomTcpProtocolClient {
         config.setClientHealTime(5);
 
         // Adding action to execute when a request has been received
-        config.addRequestHandler(Identifiers.STRING_ID.getValue(), this::onStringReceived);
-        config.addRequestHandler(Identifiers.INT_ID.getValue(), this::onIntegerReceived);
-        config.addRequestHandler(Identifiers.FLOAT_ID.getValue(), this::onFloatReceived);
-        config.addRequestHandler(Identifiers.PLAYER_ID.getValue(), this::onPlayerReceived);
+        config.addRequestHandler(Identifiers.STRING_ID, this::onStringReceived);
+        config.addRequestHandler(Identifiers.INT_ID, this::onIntegerReceived);
+        config.addRequestHandler(Identifiers.FLOAT_ID, this::onFloatReceived);
+        config.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
 
         // Creating the client
         client = Messenger.createTcpClient(config);
@@ -87,11 +89,11 @@ public class MyCustomTcpProtocolClient {
      * @param payload The string to send to the server
      */
     public void send(String payload) {
-        client.getConnection().send(config.getRequest(Identifiers.STRING_ID.getValue(), 0, payload));
+        client.getConnection().send(config.getRequest(Identifiers.STRING_ID, Errors.NO_ERROR, payload));
     }
 
     public void send(int payload) {
-        IRequestMessage request = config.getRequest(Identifiers.INT_ID.getValue(), 0, payload);
+        IRequestMessage request = config.getRequest(Identifiers.INT_ID, Errors.NO_ERROR, payload);
 
         // The request is sent synchronously
         request.setSync(true);
@@ -106,7 +108,7 @@ public class MyCustomTcpProtocolClient {
      * @param payload The float to send to the server.
      */
     public void send(float payload) {
-        IRequestMessage request = config.getRequest(Identifiers.FLOAT_ID.getValue(), 0, payload);
+        IRequestMessage request = config.getRequest(Identifiers.FLOAT_ID, Errors.NO_ERROR, payload);
 
         // Callback with default timeout to execute when a response is received from the
         // server
@@ -122,7 +124,7 @@ public class MyCustomTcpProtocolClient {
     }
 
     public void send(Player player) {
-        IRequestMessage request = config.getRequest(Identifiers.PLAYER_ID.getValue(), 0, player);
+        IRequestMessage request = config.getRequest(Identifiers.PLAYER_ID, Errors.NO_ERROR, player);
 
         // The request is sent synchronously
         request.setSync(true);
@@ -130,11 +132,14 @@ public class MyCustomTcpProtocolClient {
         // Callback to execute when a response is received from the server
         request.setCallback(2000, args -> {
             if (!args.isTimeout()) {
-                Logger.info("Client received %s", config.parse(args.response()).getPayload());
-
-                // Answering to server's answer
-                IRequestMessage response = config.getRequest(Identifiers.STRING_ID.getValue(), 0, "OK");
-                client.getConnection().answer(args.identifier(), response);
+                IRequest serverResponse = config.parse(args.response());
+                if (serverResponse.getError() != Errors.NO_ERROR)
+                    Logger.info("Cannot add a player to the server, error from server: %s", serverResponse.getError().getMessage());
+                else {
+                    // Answering to server's answer
+                    IRequestMessage response = config.getRequest(Identifiers.STRING_ID, Errors.NO_ERROR, "OK");
+                    client.getConnection().answer(args.identifier(), response);
+                }
             } else
                 Logger.error("[Client] Unexpected timeout occurred");
         });

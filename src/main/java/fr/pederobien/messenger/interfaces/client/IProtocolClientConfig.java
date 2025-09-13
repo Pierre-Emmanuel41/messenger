@@ -4,6 +4,7 @@ import fr.pederobien.communication.interfaces.connection.IConnection.Mode;
 import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.messenger.interfaces.IProtocolConfiguration;
 import fr.pederobien.messenger.interfaces.IRequestHandler;
+import fr.pederobien.protocol.interfaces.IIdentifier;
 
 import java.util.function.Supplier;
 
@@ -33,7 +34,7 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
      * @param identifier The request identifier.
      * @param handler    The action to execute when a message has been received.
      */
-    void addRequestHandler(int identifier, IRequestHandler handler);
+    void addRequestHandler(IIdentifier identifier, IRequestHandler handler);
 
     /**
      * Get the action associated to the given identifier.
@@ -41,7 +42,7 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
      * @param identifier The identifier used to get its associated action.
      * @return The handler to execute, if it exists, null otherwise.
      */
-    IRequestHandler getHandler(int identifier);
+    IRequestHandler getHandler(IIdentifier identifier);
 
     /**
      * @return An object that specify how a layer must be initialized.

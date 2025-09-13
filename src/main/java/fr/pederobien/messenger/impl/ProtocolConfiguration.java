@@ -3,6 +3,8 @@ package fr.pederobien.messenger.impl;
 import fr.pederobien.communication.interfaces.connection.ICallback.CallbackArgs;
 import fr.pederobien.messenger.interfaces.IProtocolConfiguration;
 import fr.pederobien.messenger.interfaces.IRequestMessage;
+import fr.pederobien.protocol.interfaces.IError;
+import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IProtocolManager;
 import fr.pederobien.protocol.interfaces.IRequest;
 
@@ -27,14 +29,12 @@ public class ProtocolConfiguration implements IProtocolConfiguration {
     }
 
     @Override
-    public IRequestMessage getRequest(int identifier, int errorCode, Object payload) {
-        IRequest request = manager.get(identifier);
+    public IRequestMessage getRequest(IIdentifier identifier, IError error, Object payload) {
+        IRequest request = manager.get(identifier, error, payload);
 
         if (request == null)
             return null;
 
-        request.setErrorCode(errorCode);
-        request.setPayload(payload);
         return new RequestMessage(request);
     }
 
@@ -64,13 +64,13 @@ public class ProtocolConfiguration implements IProtocolConfiguration {
         }
 
         @Override
-        public int getIdentifier() {
+        public IIdentifier getIdentifier() {
             return request.getIdentifier();
         }
 
         @Override
-        public int getErrorCode() {
-            return request.getErrorCode();
+        public IError getError() {
+            return request.getError();
         }
 
         @Override

@@ -1,6 +1,7 @@
 package fr.pederobien.messenger.example.server;
 
 import fr.pederobien.communication.interfaces.IEthernetEndPoint;
+import fr.pederobien.messenger.example.Errors;
 import fr.pederobien.messenger.example.Identifiers;
 import fr.pederobien.messenger.example.wrappers.Player;
 import fr.pederobien.messenger.interfaces.IProtocolConnection;
@@ -18,10 +19,10 @@ public class MyCustomTcpProtocolClient {
         this.client = client;
 
         // Adding action to execute when a request has been received
-        client.addRequestHandler(Identifiers.STRING_ID.getValue(), this::onStringReceived);
-        client.addRequestHandler(Identifiers.INT_ID.getValue(), this::onIntegerReceived);
-        client.addRequestHandler(Identifiers.FLOAT_ID.getValue(), this::onFloatReceived);
-        client.addRequestHandler(Identifiers.PLAYER_ID.getValue(), this::onPlayerReceived);
+        client.addRequestHandler(1, Identifiers.STRING_ID, this::onStringReceived);
+        client.addRequestHandler(2, Identifiers.INT_ID, this::onIntegerReceived);
+        client.addRequestHandler(3, Identifiers.FLOAT_ID, this::onFloatReceived);
+        client.addRequestHandler(6, Identifiers.PLAYER_ID, this::onPlayerReceived);
     }
 
     private void onStringReceived(IProtocolConnection connection, int messageID, Object payload) {
@@ -51,7 +52,7 @@ public class MyCustomTcpProtocolClient {
         Logger.info("Server received the following Float: %s", payload);
 
         // Sending a response to the client
-        IRequestMessage response = config.getRequest(Identifiers.FLOAT_ID.getValue(), 0, 1.0f);
+        IRequestMessage response = config.getRequest(Identifiers.FLOAT_ID, Errors.NO_ERROR, 1.0f);
 
         // Response sent synchronously
         response.setSync(true);
@@ -69,7 +70,7 @@ public class MyCustomTcpProtocolClient {
         Logger.info("Server received the following Player: %s", payload);
 
         // Sending a response to the client
-        IRequestMessage response = config.getRequest(Identifiers.FLOAT_ID.getValue(), 0, 3.56f);
+        IRequestMessage response = config.getRequest(Identifiers.FLOAT_ID, Errors.NO_ERROR, 3.56f);
 
         // Response sent synchronously
         response.setSync(true);

@@ -7,6 +7,7 @@ import fr.pederobien.messenger.interfaces.IProtocolConnection;
 import fr.pederobien.messenger.interfaces.IRequestHandler;
 import fr.pederobien.messenger.interfaces.server.IProtocolClient;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
+import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IRequest;
 
 import java.util.HashMap;
@@ -15,7 +16,8 @@ import java.util.Map;
 public class ProtocolClient implements IProtocolClient {
     private final IProtocolServerConfig<?> config;
     private final IProtocolConnection connection;
-    private final Map<Integer, IRequestHandler> handlers;
+    private final Map<IIdentifier, PrivilegeRequestHandler> handlers;
+    private int privilege;
 
     /**
      * Creates a client, on server side, associated to a protocol and connected to a
@@ -29,9 +31,10 @@ public class ProtocolClient implements IProtocolClient {
         this.config = config;
         this.connection = new ProtocolConnection(connection);
 
-        connection.setMessageHandler(this::onMessageReceived);
+        handlers = new HashMap<IIdentifier, PrivilegeRequestHandler>();
+        privilege = config.getPrivilege();
 
-        handlers = new HashMap<Integer, IRequestHandler>();
+        connection.setMessageHandler(this::onMessageReceived);
     }
 
     @Override
@@ -45,13 +48,23 @@ public class ProtocolClient implements IProtocolClient {
     }
 
     @Override
-    public void addRequestHandler(int identifier, IRequestHandler handler) {
-        handlers.put(identifier, handler);
+    public void addRequestHandler(int privilege, IIdentifier identifier, IRequestHandler handler) {
+        handlers.put(identifier, new PrivilegeRequestHandler(privilege, handler));
     }
 
     @Override
     public IProtocolConnection getConnection() {
         return connection;
+    }
+
+    @Override
+    public int getPrivilege() {
+        return privilege;
+    }
+
+    @Override
+    public void setPrivilege(int privilege) {
+        this.privilege = privilege;
     }
 
     @Override
@@ -70,12 +83,34 @@ public class ProtocolClient implements IProtocolClient {
         if (request == null)
             return;
 
-        // Getting action to execute for the specific identifier
-        IRequestHandler action = handlers.get(request.getIdentifier());
-        if (action == null)
+        // Getting the handler to execute for the specific identifier
+        PrivilegeRequestHandler handler = handlers.get(request.getIdentifier());
+        if (handler == null)
             return;
 
-        // Applying the action
-        action.apply(connection, event.getIdentifier(), request.getPayload());
+        // Checking client privilege
+        if (privilege < handler.privilege()) {
+            // Request is denied, client's privilege are not high enough
+            config.getDeniedRequestHandler().apply(connection, event.getIdentifier(), this, handler.privilege(), request);
+        } else {
+            // Applying the action
+            handler.apply(connection, event.getIdentifier(), request.getPayload());
+        }
+    }
+
+    private record PrivilegeRequestHandler(int privilege, IRequestHandler handler) {
+
+        public PrivilegeRequestHandler {
+
+        }
+
+        @Override
+        public int privilege() {
+            return privilege;
+        }
+
+        public void apply(IProtocolConnection connection, int messageID, Object payload) {
+            handler.apply(connection, messageID, payload);
+        }
     }
 }
