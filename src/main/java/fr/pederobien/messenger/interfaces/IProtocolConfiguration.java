@@ -1,5 +1,7 @@
 package fr.pederobien.messenger.interfaces;
 
+import fr.pederobien.protocol.interfaces.IError;
+import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IRequest;
 
 public interface IProtocolConfiguration {
@@ -26,10 +28,10 @@ public interface IProtocolConfiguration {
      * least one protocol, and set its error code and payload.
      *
      * @param identifier The request identifier.
-     * @param errorCode  The request error code.
+     * @param error      The request error.
      * @param payload    The request payload.
      * @return The request ready to be sent to the server or null if the identifier
      * is not supported.
      */
-    IRequestMessage getRequest(int identifier, int errorCode, Object payload);
+    IRequestMessage getRequest(IIdentifier identifier, IError error, Object payload);
 }

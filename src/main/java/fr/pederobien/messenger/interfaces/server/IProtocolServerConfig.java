@@ -3,6 +3,7 @@ package fr.pederobien.messenger.interfaces.server;
 import fr.pederobien.communication.interfaces.connection.IConnection.Mode;
 import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.communication.interfaces.server.IClientValidator;
+import fr.pederobien.messenger.interfaces.IDeniedRequestHandler;
 import fr.pederobien.messenger.interfaces.IProtocolConfiguration;
 
 import java.util.function.Supplier;
@@ -61,6 +62,16 @@ public interface IProtocolServerConfig<T> extends IProtocolConfiguration {
     IClientValidator<T> getClientValidator();
 
     /**
+     * When a client just connect to the server, it will have a default privilege level. The privilege level is used to
+     * restrict request processing. When a request is received by the remote, the privilege associated to the request
+     * will be compared to the privilege of the client. The request will be processed if and only if the client privilege
+     * level is greater than or equals to the request privilege level.
+     *
+     * @return The default privilege level of a client.
+     */
+    int getPrivilege();
+
+    /**
      * The server is monitored when waiting for a new client, validating client
      * end-point and initialising the connection with the remote. During the server
      * lifetime, it is likely possible that the server become unstable. The
@@ -84,4 +95,13 @@ public interface IProtocolServerConfig<T> extends IProtocolConfiguration {
      * decremented.
      */
     int getServerHealTime();
+
+    /**
+     * When a client received a request with higher privilege than client's privilege, the server may or may not respond
+     * to the remote client that the request has been denied. This request handler is used to specify the server behavior
+     * when a request has a too high privilege.
+     *
+     * @return The request handler to execute when a request is denied by the server.
+     */
+    IDeniedRequestHandler getDeniedRequestHandler();
 }
