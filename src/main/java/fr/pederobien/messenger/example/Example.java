@@ -32,6 +32,14 @@ public class Example {
         client.send(new Player("Pierre", 35));
 
         sleep(2000);
+
+        client.disconnect();
+        client.dispose();
+
+        sleep(500);
+
+        server.close();
+        server.dispose();
     }
 
     private static void sleep(int millis) {
