@@ -77,10 +77,10 @@ config.setClientMaxUnstableCounter(2);
 config.setClientHealTime(5);
 
 // Adding action to execute when a request has been received
-config.addRequestHandler(Identifiers.STRING_ID.getValue(), this::onStringReceived);
-config.addRequestHandler(Identifiers.INT_ID.getValue(), this::onIntegerReceived);
-config.addRequestHandler(Identifiers.FLOAT_ID.getValue(), this::onFloatReceived);
-config.addRequestHandler(Identifiers.PLAYER_ID.getValue(), this::onPlayerReceived);
+config.addRequestHandler(Identifiers.STRING_ID, this::onStringReceived);
+config.addRequestHandler(Identifiers.INT_ID, this::onIntegerReceived);
+config.addRequestHandler(Identifiers.FLOAT_ID, this::onFloatReceived);
+config.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
 
 // Creating the client
 client = Messenger.createTcpClient(config);
