@@ -19,10 +19,10 @@ public class MyCustomTcpProtocolClient {
         this.client = client;
 
         // Adding action to execute when a request has been received
-        client.addRequestHandler(1, Identifiers.STRING_ID, this::onStringReceived);
-        client.addRequestHandler(2, Identifiers.INT_ID, this::onIntegerReceived);
-        client.addRequestHandler(3, Identifiers.FLOAT_ID, this::onFloatReceived);
-        client.addRequestHandler(6, Identifiers.PLAYER_ID, this::onPlayerReceived);
+        client.addRequestHandler(Identifiers.STRING_ID, this::onStringReceived);
+        client.addRequestHandler(Identifiers.INT_ID, this::onIntegerReceived);
+        client.addRequestHandler(Identifiers.FLOAT_ID, this::onFloatReceived);
+        client.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
     }
 
     private void onStringReceived(IProtocolConnection connection, int messageID, Object payload) {

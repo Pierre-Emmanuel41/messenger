@@ -4,12 +4,8 @@ import fr.pederobien.communication.impl.layer.LayerInitializer;
 import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.communication.interfaces.server.IClientValidator;
 import fr.pederobien.messenger.impl.ProtocolConfiguration;
-import fr.pederobien.messenger.interfaces.IDeniedRequestHandler;
-import fr.pederobien.messenger.interfaces.IProtocolConnection;
-import fr.pederobien.messenger.interfaces.server.IProtocolClient;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.protocol.interfaces.IProtocolManager;
-import fr.pederobien.protocol.interfaces.IRequest;
 
 import java.util.function.Supplier;
 
@@ -22,8 +18,6 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
     private IClientValidator<T> clientValidator;
     private int serverMaxUnstableCounter;
     private int serverHealTime;
-    private int privilege;
-    private IDeniedRequestHandler deniedRequestHandler;
 
     /**
      * Creates a server configuration associated to a protocol manager.
@@ -44,8 +38,6 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
         clientValidator = _ -> true;
         serverMaxUnstableCounter = 5;
         serverHealTime = 1000;
-        privilege = 5;
-        deniedRequestHandler = this::onDeniedRequest;
     }
 
     @Override
@@ -126,23 +118,6 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
     }
 
     @Override
-    public int getPrivilege() {
-        return privilege;
-    }
-
-    /**
-     * When a client just connect to the server, it will have a default privilege level. The privilege level is used to
-     * restrict request processing. When a request is received by the remote, the privilege associated to the request
-     * will be compared to the privilege of the client. The request will be processed if and only if the client privilege
-     * level is greater than or equals to the request privilege level.
-     *
-     * @param privilege The default privilege level of a client.
-     */
-    public void setPrivilege(int privilege) {
-        this.privilege = privilege;
-    }
-
-    @Override
     public int getServerMaxUnstableCounter() {
         return serverMaxUnstableCounter;
     }
@@ -180,25 +155,5 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
      */
     public void setServerHealTime(int serverHealTime) {
         this.serverHealTime = serverHealTime;
-    }
-
-    @Override
-    public IDeniedRequestHandler getDeniedRequestHandler() {
-        return deniedRequestHandler;
-    }
-
-    /**
-     * When a client received a request with higher privilege than client's privilege, the server may or may not respond
-     * to the remote client that the request has been denied. This request handler is used to specify the server behavior
-     * when a request will not be processed.
-     *
-     * @param deniedRequestHandler The request handler to execute when a request is denied by the server.
-     */
-    public void setDeniedRequestHandler(IDeniedRequestHandler deniedRequestHandler) {
-        this.deniedRequestHandler = deniedRequestHandler;
-    }
-
-    private void onDeniedRequest(IProtocolConnection connection, int messageID, IProtocolClient client, int requestPrivilege, IRequest request) {
-        // Do nothing
     }
 }

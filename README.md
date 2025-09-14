@@ -117,18 +117,12 @@ config.setConnectionHealTime(100);
 // Validate or not if a client is allowed to be connected to the server
 config.setClientValidator(this::validateClient);
 
-// Default privilege level when a client connects, by default it's 5
-config.setPrivilege(3);
-
 // If the server unstable counter reach 2, the server will be
 // closed automatically as well as each client currently connected.
 config.setServerMaxUnstableCounter(2);
 
 // Decrement the value of the server unstable counter each 5 ms
 config.setServerHealTime(5);
-
-// Server behaviour when a request is denied
-config.setDeniedRequestHandler(this::onRequestDenied);
 
 server = Messenger.createTcpServer(config);
 ```
@@ -141,10 +135,10 @@ but on the server side. The custom client set all the request the client support
 
 ```java
 // Adding action to execute when a request has been received
-client.addRequestHandler(1, Identifiers.STRING_ID, this::onStringReceived);
-client.addRequestHandler(2, Identifiers.INT_ID, this::onIntegerReceived);
-client.addRequestHandler(3, Identifiers.FLOAT_ID, this::onFloatReceived);
-client.addRequestHandler(6, Identifiers.PLAYER_ID, this::onPlayerReceived);
+client.addRequestHandler(Identifiers.STRING_ID, this::onStringReceived);
+client.addRequestHandler(Identifiers.INT_ID, this::onIntegerReceived);
+client.addRequestHandler(Identifiers.FLOAT_ID, this::onFloatReceived);
+client.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
 ```
 
 The client implementation, on server side, can be encapsulated in your own client class, see
