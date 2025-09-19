@@ -33,6 +33,6 @@ public class NewProtocolClientEvent extends ProtocolServerEvent {
         joiner.add("server=" + getServer());
         joiner.add("remote=" + getClient());
 
-        return joiner.toString();
+        return String.format("%s_%s", getName(), joiner);
     }
 }
