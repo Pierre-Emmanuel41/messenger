@@ -84,7 +84,7 @@ public class MyCustomTcpProtocolServer implements IEventListener {
         if (event.getServer() != server)
             return;
 
-        clients.add(new MyCustomTcpProtocolClient(config, event.getClient()));
+        clients.add(new MyCustomTcpProtocolClient(event.getClient()));
     }
 
     /**

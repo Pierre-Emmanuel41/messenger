@@ -5,8 +5,10 @@ import fr.pederobien.communication.interfaces.connection.IConnection;
 import fr.pederobien.messenger.impl.ProtocolConnection;
 import fr.pederobien.messenger.interfaces.IProtocolConnection;
 import fr.pederobien.messenger.interfaces.IRequestHandler;
+import fr.pederobien.messenger.interfaces.IRequestMessage;
 import fr.pederobien.messenger.interfaces.server.IProtocolClient;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
+import fr.pederobien.protocol.interfaces.IError;
 import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IRequest;
 
@@ -48,6 +50,16 @@ public class ProtocolClient implements IProtocolClient {
     @Override
     public void addRequestHandler(IIdentifier identifier, IRequestHandler handler) {
         handlers.put(identifier, handler);
+    }
+
+    @Override
+    public IRequest parse(byte[] data) {
+        return config.parse(data);
+    }
+
+    @Override
+    public IRequestMessage getRequest(IIdentifier identifier, IError error, Object payload) {
+        return config.getRequest(identifier, error, payload);
     }
 
     @Override
