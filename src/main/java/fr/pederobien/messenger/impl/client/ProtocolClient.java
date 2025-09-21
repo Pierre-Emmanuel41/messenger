@@ -7,6 +7,7 @@ import fr.pederobien.communication.impl.ClientConfig;
 import fr.pederobien.communication.impl.Communication;
 import fr.pederobien.communication.interfaces.client.IClient;
 import fr.pederobien.communication.interfaces.client.IClientImpl;
+import fr.pederobien.messenger.event.ProtocolClientConnectedEvent;
 import fr.pederobien.messenger.event.ProtocolClientUnstableEvent;
 import fr.pederobien.messenger.impl.ProtocolConnection;
 import fr.pederobien.messenger.interfaces.IProtocolConnection;
@@ -84,6 +85,7 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
             return;
 
         connection = new ProtocolConnection(client.getConnection());
+        EventManager.callEvent(new ProtocolClientConnectedEvent(this));
     }
 
     @EventHandler
