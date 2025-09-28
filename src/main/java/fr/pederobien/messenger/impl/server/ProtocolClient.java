@@ -11,6 +11,8 @@ import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.protocol.interfaces.IError;
 import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IRequest;
+import fr.pederobien.utils.ByteWrapper;
+import fr.pederobien.utils.event.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,17 +80,35 @@ public class ProtocolClient implements IProtocolClient {
      * @param event The event that contains the unexpected request.
      */
     private void onMessageReceived(MessageEvent event) {
+        debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
+
         // Parsing client request
         IRequest request = config.parse(event.getData());
-        if (request == null)
+        if (request == null) {
+            debug("Unknown message");
             return;
+        }
 
         // Getting the handler to execute for the specific identifier
         IRequestHandler handler = handlers.get(request.getIdentifier());
-        if (handler == null)
+        if (handler == null) {
+            debug("No request handler defined");
             return;
+        }
+
+        debug("Calling the associated request handler");
 
         // Applying the action
         handler.apply(connection, event.getIdentifier(), request.getPayload());
+    }
+
+    /**
+     * Print a log using DEBUG level.
+     *
+     * @param message The message to print.
+     * @param args    The arguments of the message.
+     */
+    private void debug(String message, Object... args) {
+        Logger.debug("%s - %s", this, String.format(message, args));
     }
 }

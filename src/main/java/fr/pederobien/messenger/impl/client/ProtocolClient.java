@@ -15,9 +15,11 @@ import fr.pederobien.messenger.interfaces.IRequestHandler;
 import fr.pederobien.messenger.interfaces.client.IProtocolClient;
 import fr.pederobien.messenger.interfaces.client.IProtocolClientConfig;
 import fr.pederobien.protocol.interfaces.IRequest;
+import fr.pederobien.utils.ByteWrapper;
 import fr.pederobien.utils.event.EventHandler;
 import fr.pederobien.utils.event.EventManager;
 import fr.pederobien.utils.event.IEventListener;
+import fr.pederobien.utils.event.Logger;
 
 public class ProtocolClient<T> implements IProtocolClient, IEventListener {
     private final IProtocolClientConfig<T> config;
@@ -102,17 +104,35 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
      * @param event The event that contains the data.
      */
     private void onMessageReceived(MessageEvent event) {
+        debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
+
         // Parsing server request
         IRequest request = config.parse(event.getData());
-        if (request == null)
+        if (request == null) {
+            debug("Unknown message");
             return;
+        }
 
         // Getting the request handler to execute for the specific identifier
         IRequestHandler handler = config.getHandler(request.getIdentifier());
-        if (handler == null)
+        if (handler == null) {
+            debug("No request handler defined");
             return;
+        }
+
+        debug("Calling the associated request handler");
 
         // Applying the action
         handler.apply(connection, event.getIdentifier(), request.getPayload());
+    }
+
+    /**
+     * Print a log using DEBUG level.
+     *
+     * @param message The message to print.
+     * @param args    The arguments of the message.
+     */
+    private void debug(String message, Object... args) {
+        Logger.debug("%s - %s", this, String.format(message, args));
     }
 }
