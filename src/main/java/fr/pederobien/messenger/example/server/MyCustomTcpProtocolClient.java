@@ -9,78 +9,78 @@ import fr.pederobien.messenger.interfaces.server.IProtocolClient;
 import fr.pederobien.utils.event.Logger;
 
 public class MyCustomTcpProtocolClient {
-    private final IProtocolClient client;
+	private final IProtocolClient client;
 
-    public MyCustomTcpProtocolClient(IProtocolClient client) {
-        this.client = client;
+	public MyCustomTcpProtocolClient(IProtocolClient client) {
+		this.client = client;
 
-        // Adding action to execute when a request has been received
-        client.addRequestHandler(Identifiers.STRING_ID, this::onStringReceived);
-        client.addRequestHandler(Identifiers.INT_ID, this::onIntegerReceived);
-        client.addRequestHandler(Identifiers.FLOAT_ID, this::onFloatReceived);
-        client.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
-    }
+		// Adding action to execute when a request has been received
+		client.addRequestHandler(Identifiers.STRING_ID, this::onStringReceived);
+		client.addRequestHandler(Identifiers.INT_ID, this::onIntegerReceived);
+		client.addRequestHandler(Identifiers.FLOAT_ID, this::onFloatReceived);
+		client.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
+	}
 
-    private void onStringReceived(IProtocolConnection connection, int messageID, Object payload) {
-        if (!(payload instanceof String)) {
-            Logger.error("Technical error happened, expecting String but got %s", payload.getClass());
-            return;
-        }
+	private void onStringReceived(IProtocolConnection connection, int messageID, Object payload) {
+		if (!(payload instanceof String)) {
+			Logger.error("Technical error happened, expecting String but got %s", payload.getClass());
+			return;
+		}
 
-        Logger.info("Server received the following String: %s", payload);
-    }
+		Logger.info("Server received the following String: %s", payload);
+	}
 
-    private void onIntegerReceived(IProtocolConnection connection, int messageID, Object payload) {
-        if (!(payload instanceof Integer)) {
-            Logger.error("Technical error happened, expecting Integer but got %s", payload.getClass());
-            return;
-        }
+	private void onIntegerReceived(IProtocolConnection connection, int messageID, Object payload) {
+		if (!(payload instanceof Integer)) {
+			Logger.error("Technical error happened, expecting Integer but got %s", payload.getClass());
+			return;
+		}
 
-        Logger.info("Server received the following Integer: %s", payload);
-    }
+		Logger.info("Server received the following Integer: %s", payload);
+	}
 
-    private void onFloatReceived(IProtocolConnection connection, int messageID, Object payload) {
-        if (!(payload instanceof Float)) {
-            Logger.error("Technical error happened, expecting Float but got %s", payload.getClass());
-            return;
-        }
+	private void onFloatReceived(IProtocolConnection connection, int messageID, Object payload) {
+		if (!(payload instanceof Float)) {
+			Logger.error("Technical error happened, expecting Float but got %s", payload.getClass());
+			return;
+		}
 
-        Logger.info("Server received the following Float: %s", payload);
+		Logger.info("Server received the following Float: %s", payload);
 
-        // Sending a response to the client
-        IRequestMessage response = client.getRequest(Identifiers.FLOAT_ID, Errors.NO_ERROR, 1.0f);
+		// Sending a response to the client
+		IRequestMessage response = client.getRequest(Identifiers.FLOAT_ID, Errors.NO_ERROR, 1.0f);
 
-        // Response sent synchronously
-        response.setSync(true);
+		// Response sent synchronously
+		response.setSync(true);
 
-        // Answering to client request
-        client.getConnection().answer(messageID, response);
-    }
+		// Answering to client request
+		client.getConnection().answer(messageID, response);
+	}
 
-    private void onPlayerReceived(IProtocolConnection connection, int messageID, Object payload) {
-        if (!(payload instanceof Player)) {
-            Logger.error("Technical error happened, expecting Player but got %s", payload.getClass());
-            return;
-        }
+	private void onPlayerReceived(IProtocolConnection connection, int messageID, Object payload) {
+		if (!(payload instanceof Player)) {
+			Logger.error("Technical error happened, expecting Player but got %s", payload.getClass());
+			return;
+		}
 
-        Logger.info("Server received the following Player: %s", payload);
+		Logger.info("Server received the following Player: %s", payload);
 
-        // Sending a response to the client
-        IRequestMessage response = client.getRequest(Identifiers.FLOAT_ID, Errors.NO_ERROR, 3.56f);
+		// Sending a response to the client
+		IRequestMessage response = client.getRequest(Identifiers.FLOAT_ID, Errors.NO_ERROR, 3.56f);
 
-        // Response sent synchronously
-        response.setSync(true);
+		// Response sent synchronously
+		response.setSync(true);
 
-        // Callback to execute when a response is received from the client
-        response.setCallback(2000, arguments -> {
-            if (!arguments.isTimeout()) {
-                Object data = client.parse(arguments.response()).getPayload();
-                Logger.info("Server received the following response: %s", data);
-            } else
-                Logger.error("[Server] Unexpected timeout occurred");
-        });
+		// Callback to execute when a response is received from the client
+		response.setCallback(2000, arguments -> {
+			if (!arguments.isTimeout()) {
+				Object data = client.parse(arguments.response()).getPayload();
+				Logger.info("Server received the following response: %s", data);
+			} else
+				Logger.error("[Server] Unexpected timeout occurred");
+		});
 
-        // Answering to client request
-        client.getConnection().answer(messageID, response);
-    }
+		// Answering to client request
+		client.getConnection().answer(messageID, response);
+	}
 }

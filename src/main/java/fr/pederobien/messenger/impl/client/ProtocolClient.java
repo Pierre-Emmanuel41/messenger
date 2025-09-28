@@ -22,117 +22,117 @@ import fr.pederobien.utils.event.IEventListener;
 import fr.pederobien.utils.event.Logger;
 
 public class ProtocolClient<T> implements IProtocolClient, IEventListener {
-    private final IProtocolClientConfig<T> config;
-    private final IClient client;
-    private IProtocolConnection connection;
+	private final IProtocolClientConfig<T> config;
+	private final IClient client;
+	private IProtocolConnection connection;
 
-    /**
-     * Creates a client associated to a protocol.
-     *
-     * @param config The client configuration.
-     * @param impl   The client implementation.
-     */
-    public ProtocolClient(IProtocolClientConfig<T> config, IClientImpl<T> impl) {
-        this.config = config;
+	/**
+	 * Creates a client associated to a protocol.
+	 *
+	 * @param config The client configuration.
+	 * @param impl   The client implementation.
+	 */
+	public ProtocolClient(IProtocolClientConfig<T> config, IClientImpl<T> impl) {
+		this.config = config;
 
-        // Creating a configuration for the client to connect to the server
-        ClientConfig<T> clientConfig = Communication.createClientConfig(config.getName(), config.getEndPoint());
-        clientConfig.setLayerInitializer(config.getLayerInitializer());
-        clientConfig.setConnectionMaxUnstableCounter(config.getConnectionMaxUnstableCounter());
-        clientConfig.setConnectionHealTime(config.getConnectionHealTime());
-        clientConfig.setConnectionTimeout(config.getConnectionTimeout());
-        clientConfig.setAutomaticReconnection(config.isAutomaticReconnection());
-        clientConfig.setReconnectionDelay(config.getReconnectionDelay());
-        clientConfig.setClientMaxUnstableCounter(config.getClientMaxUnstableCounter());
-        clientConfig.setMessageHandler(this::onMessageReceived);
+		// Creating a configuration for the client to connect to the server
+		ClientConfig<T> clientConfig = Communication.createClientConfig(config.getName(), config.getEndPoint());
+		clientConfig.setLayerInitializer(config.getLayerInitializer());
+		clientConfig.setConnectionMaxUnstableCounter(config.getConnectionMaxUnstableCounter());
+		clientConfig.setConnectionHealTime(config.getConnectionHealTime());
+		clientConfig.setConnectionTimeout(config.getConnectionTimeout());
+		clientConfig.setAutomaticReconnection(config.isAutomaticReconnection());
+		clientConfig.setReconnectionDelay(config.getReconnectionDelay());
+		clientConfig.setClientMaxUnstableCounter(config.getClientMaxUnstableCounter());
+		clientConfig.setMessageHandler(this::onMessageReceived);
 
-        client = Communication.createClient(clientConfig, impl);
-    }
+		client = Communication.createClient(clientConfig, impl);
+	}
 
-    @Override
-    public void connect() {
-        EventManager.registerListener(this);
+	@Override
+	public void connect() {
+		EventManager.registerListener(this);
 
-        client.connect();
-    }
+		client.connect();
+	}
 
-    @Override
-    public void disconnect() {
-        client.disconnect();
-    }
+	@Override
+	public void disconnect() {
+		client.disconnect();
+	}
 
-    @Override
-    public void dispose() {
-        client.dispose();
-    }
+	@Override
+	public void dispose() {
+		client.dispose();
+	}
 
-    @Override
-    public boolean isDisposed() {
-        return client.isDisposed();
-    }
+	@Override
+	public boolean isDisposed() {
+		return client.isDisposed();
+	}
 
-    @Override
-    public IProtocolConnection getConnection() {
-        return connection;
-    }
+	@Override
+	public IProtocolConnection getConnection() {
+		return connection;
+	}
 
-    @Override
-    public String toString() {
-        return client.toString();
-    }
+	@Override
+	public String toString() {
+		return client.toString();
+	}
 
-    @EventHandler
-    private void onConnectionComplete(ClientConnectedEvent event) {
-        if (event.getClient() != client)
-            return;
+	@EventHandler
+	private void onConnectionComplete(ClientConnectedEvent event) {
+		if (event.getClient() != client)
+			return;
 
-        connection = new ProtocolConnection(client.getConnection());
-        EventManager.callEvent(new ProtocolClientConnectedEvent(this));
-    }
+		connection = new ProtocolConnection(client.getConnection());
+		EventManager.callEvent(new ProtocolClientConnectedEvent(this));
+	}
 
-    @EventHandler
-    private void onClientUnstable(ClientUnstableEvent event) {
-        if (event.getClient() != client)
-            return;
+	@EventHandler
+	private void onClientUnstable(ClientUnstableEvent event) {
+		if (event.getClient() != client)
+			return;
 
-        EventManager.callEvent(new ProtocolClientUnstableEvent(this));
-    }
+		EventManager.callEvent(new ProtocolClientUnstableEvent(this));
+	}
 
-    /**
-     * Method called when an unexpected message has been received from the server.
-     *
-     * @param event The event that contains the data.
-     */
-    private void onMessageReceived(MessageEvent event) {
-        debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
+	/**
+	 * Method called when an unexpected message has been received from the server.
+	 *
+	 * @param event The event that contains the data.
+	 */
+	private void onMessageReceived(MessageEvent event) {
+		debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
 
-        // Parsing server request
-        IRequest request = config.parse(event.getData());
-        if (request == null) {
-            debug("Unknown message");
-            return;
-        }
+		// Parsing server request
+		IRequest request = config.parse(event.getData());
+		if (request == null) {
+			debug("Unknown message");
+			return;
+		}
 
-        // Getting the request handler to execute for the specific identifier
-        IRequestHandler handler = config.getHandler(request.getIdentifier());
-        if (handler == null) {
-            debug("No request handler defined");
-            return;
-        }
+		// Getting the request handler to execute for the specific identifier
+		IRequestHandler handler = config.getHandler(request.getIdentifier());
+		if (handler == null) {
+			debug("No request handler defined");
+			return;
+		}
 
-        debug("Calling the associated request handler");
+		debug("Calling the associated request handler");
 
-        // Applying the action
-        handler.apply(connection, event.getIdentifier(), request.getPayload());
-    }
+		// Applying the action
+		handler.apply(connection, event.getIdentifier(), request.getPayload());
+	}
 
-    /**
-     * Print a log using DEBUG level.
-     *
-     * @param message The message to print.
-     * @param args    The arguments of the message.
-     */
-    private void debug(String message, Object... args) {
-        Logger.debug("%s - %s", this, String.format(message, args));
-    }
+	/**
+	 * Print a log using DEBUG level.
+	 *
+	 * @param message The message to print.
+	 * @param args    The arguments of the message.
+	 */
+	private void debug(String message, Object... args) {
+		Logger.debug("%s - %s", this, String.format(message, args));
+	}
 }

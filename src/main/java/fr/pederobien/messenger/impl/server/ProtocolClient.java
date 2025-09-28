@@ -18,97 +18,95 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProtocolClient implements IProtocolClient {
-    private final IProtocolServerConfig<?> config;
-    private final IProtocolConnection connection;
-    private final Map<IIdentifier, IRequestHandler> handlers;
+	private final IProtocolServerConfig<?> config;
+	private final IProtocolConnection connection;
+	private final Map<IIdentifier, IRequestHandler> handlers;
 
-    /**
-     * Creates a client, on server side, associated to a protocol and connected to a
-     * remote.
-     *
-     * @param config     The server configuration that gather protocol and supported
-     *                   requests.
-     * @param connection The connection to with the remote.
-     */
-    protected ProtocolClient(IProtocolServerConfig<?> config, IConnection connection) {
-        this.config = config;
-        this.connection = new ProtocolConnection(connection);
+	/**
+	 * Creates a client, on server side, associated to a protocol and connected to a remote.
+	 *
+	 * @param config     The server configuration that gather protocol and supported requests.
+	 * @param connection The connection to with the remote.
+	 */
+	protected ProtocolClient(IProtocolServerConfig<?> config, IConnection connection) {
+		this.config = config;
+		this.connection = new ProtocolConnection(connection);
 
-        handlers = new HashMap<IIdentifier, IRequestHandler>();
+		handlers = new HashMap<IIdentifier, IRequestHandler>();
 
-        connection.setMessageHandler(this::onMessageReceived);
-    }
+		connection.setMessageHandler(this::onMessageReceived);
+	}
 
-    @Override
-    public void dispose() {
-        connection.dispose();
-    }
+	@Override
+	public void dispose() {
+		connection.dispose();
+	}
 
-    @Override
-    public boolean isDisposed() {
-        return connection.isDisposed();
-    }
+	@Override
+	public boolean isDisposed() {
+		return connection.isDisposed();
+	}
 
-    @Override
-    public void addRequestHandler(IIdentifier identifier, IRequestHandler handler) {
-        handlers.put(identifier, handler);
-    }
+	@Override
+	public void addRequestHandler(IIdentifier identifier, IRequestHandler handler) {
+		handlers.put(identifier, handler);
+	}
 
-    @Override
-    public IRequest parse(byte[] data) {
-        return config.parse(data);
-    }
+	@Override
+	public IRequest parse(byte[] data) {
+		return config.parse(data);
+	}
 
-    @Override
-    public IRequestMessage getRequest(IIdentifier identifier, IError error, Object payload) {
-        return config.getRequest(identifier, error, payload);
-    }
+	@Override
+	public IRequestMessage getRequest(IIdentifier identifier, IError error, Object payload) {
+		return config.getRequest(identifier, error, payload);
+	}
 
-    @Override
-    public IProtocolConnection getConnection() {
-        return connection;
-    }
+	@Override
+	public IProtocolConnection getConnection() {
+		return connection;
+	}
 
-    @Override
-    public String toString() {
-        return connection.toString();
-    }
+	@Override
+	public String toString() {
+		return connection.toString();
+	}
 
-    /**
-     * Method called when an unexpected request has been received from the remote.
-     *
-     * @param event The event that contains the unexpected request.
-     */
-    private void onMessageReceived(MessageEvent event) {
-        debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
+	/**
+	 * Method called when an unexpected request has been received from the remote.
+	 *
+	 * @param event The event that contains the unexpected request.
+	 */
+	private void onMessageReceived(MessageEvent event) {
+		debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
 
-        // Parsing client request
-        IRequest request = config.parse(event.getData());
-        if (request == null) {
-            debug("Unknown message");
-            return;
-        }
+		// Parsing client request
+		IRequest request = config.parse(event.getData());
+		if (request == null) {
+			debug("Unknown message");
+			return;
+		}
 
-        // Getting the handler to execute for the specific identifier
-        IRequestHandler handler = handlers.get(request.getIdentifier());
-        if (handler == null) {
-            debug("No request handler defined");
-            return;
-        }
+		// Getting the handler to execute for the specific identifier
+		IRequestHandler handler = handlers.get(request.getIdentifier());
+		if (handler == null) {
+			debug("No request handler defined");
+			return;
+		}
 
-        debug("Calling the associated request handler");
+		debug("Calling the associated request handler");
 
-        // Applying the action
-        handler.apply(connection, event.getIdentifier(), request.getPayload());
-    }
+		// Applying the action
+		handler.apply(connection, event.getIdentifier(), request.getPayload());
+	}
 
-    /**
-     * Print a log using DEBUG level.
-     *
-     * @param message The message to print.
-     * @param args    The arguments of the message.
-     */
-    private void debug(String message, Object... args) {
-        Logger.debug("%s - %s", this, String.format(message, args));
-    }
+	/**
+	 * Print a log using DEBUG level.
+	 *
+	 * @param message The message to print.
+	 * @param args    The arguments of the message.
+	 */
+	private void debug(String message, Object... args) {
+		Logger.debug("%s - %s", this, String.format(message, args));
+	}
 }

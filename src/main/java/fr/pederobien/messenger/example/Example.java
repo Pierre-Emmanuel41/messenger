@@ -7,46 +7,46 @@ import fr.pederobien.utils.event.Logger;
 
 public class Example {
 
-    public static void main(String[] args) {
-        Logger.instance().newLine(true).timeStamp(true).debug(true).colorized(true);
-        MyCustomTcpProtocolServer server = new MyCustomTcpProtocolServer();
-        server.open();
+	public static void main(String[] args) {
+		Logger.instance().newLine(true).timeStamp(true).debug(true).colorized(true);
+		MyCustomTcpProtocolServer server = new MyCustomTcpProtocolServer();
+		server.open();
 
-        MyCustomTcpProtocolClient client = new MyCustomTcpProtocolClient();
-        client.connect();
+		MyCustomTcpProtocolClient client = new MyCustomTcpProtocolClient();
+		client.connect();
 
-        sleep(2000);
+		sleep(2000);
 
-        client.send("Client 123456");
+		client.send("Client 123456");
 
-        sleep(1000);
+		sleep(1000);
 
-        client.send(987654);
+		client.send(987654);
 
-        sleep(1000);
+		sleep(1000);
 
-        client.send(5.0f);
+		client.send(5.0f);
 
-        sleep(1000);
+		sleep(1000);
 
-        client.send(new Player("Pierre", 35));
+		client.send(new Player("Pierre", 35));
 
-        sleep(2000);
+		sleep(2000);
 
-        client.disconnect();
-        client.dispose();
+		client.disconnect();
+		client.dispose();
 
-        sleep(500);
+		sleep(500);
 
-        server.close();
-        server.dispose();
-    }
+		server.close();
+		server.dispose();
+	}
 
-    private static void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+	private static void sleep(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 }

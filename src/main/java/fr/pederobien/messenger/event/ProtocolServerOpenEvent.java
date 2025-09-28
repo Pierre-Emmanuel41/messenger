@@ -6,19 +6,19 @@ import java.util.StringJoiner;
 
 public class ProtocolServerOpenEvent extends ProtocolServerEvent {
 
-    /**
-     * Creates a server open event.
-     *
-     * @param server The opened server.
-     */
-    public ProtocolServerOpenEvent(IProtocolServer server) {
-        super(server);
-    }
+	/**
+	 * Creates a server open event.
+	 *
+	 * @param server The opened server.
+	 */
+	public ProtocolServerOpenEvent(IProtocolServer server) {
+		super(server);
+	}
 
-    @Override
-    public String toString() {
-        StringJoiner joiner = new StringJoiner(",", "{", "}");
-        joiner.add("server=" + getServer());
-        return String.format("%s_%s", getName(), joiner);
-    }
+	@Override
+	public String toString() {
+		StringJoiner joiner = new StringJoiner(",", "{", "}");
+		joiner.add("server=" + getServer());
+		return String.format("%s_%s", getName(), joiner);
+	}
 }

@@ -6,19 +6,19 @@ import java.util.StringJoiner;
 
 public class ProtocolConnectionLostEvent extends ProtocolConnectionEvent {
 
-    /**
-     * Creates a connection lost event.
-     *
-     * @param connection The connection which is no more connected with its remote.
-     */
-    public ProtocolConnectionLostEvent(IProtocolConnection connection) {
-        super(connection);
-    }
+	/**
+	 * Creates a connection lost event.
+	 *
+	 * @param connection The connection which is no more connected with its remote.
+	 */
+	public ProtocolConnectionLostEvent(IProtocolConnection connection) {
+		super(connection);
+	}
 
-    @Override
-    public String toString() {
-        StringJoiner joiner = new StringJoiner(",", "{", "}");
-        joiner.add("remote=" + getConnection());
-        return String.format("%s_%s", getName(), joiner);
-    }
+	@Override
+	public String toString() {
+		StringJoiner joiner = new StringJoiner(",", "{", "}");
+		joiner.add("remote=" + getConnection());
+		return String.format("%s_%s", getName(), joiner);
+	}
 }

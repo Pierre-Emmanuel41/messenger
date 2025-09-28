@@ -11,116 +11,114 @@ import fr.pederobien.protocol.interfaces.IRequest;
 import java.util.function.Consumer;
 
 public class ProtocolConfiguration implements IProtocolConfiguration {
-    private final IProtocolManager manager;
+	private final IProtocolManager manager;
 
-    /**
-     * Creates a simple configuration that gather a protocol and a list of supported
-     * action for a specific identifier.
-     *
-     * @param manager The manager that contains supported protocols.
-     */
-    public ProtocolConfiguration(IProtocolManager manager) {
-        this.manager = manager;
-    }
+	/**
+	 * Creates a simple configuration that gather a protocol and a list of supported action for a specific identifier.
+	 *
+	 * @param manager The manager that contains supported protocols.
+	 */
+	public ProtocolConfiguration(IProtocolManager manager) {
+		this.manager = manager;
+	}
 
-    @Override
-    public IRequest parse(byte[] data) {
-        return manager.parse(data);
-    }
+	@Override
+	public IRequest parse(byte[] data) {
+		return manager.parse(data);
+	}
 
-    @Override
-    public IRequestMessage getRequest(IIdentifier identifier, IError error, Object payload) {
-        IRequest request = manager.get(identifier, error, payload);
+	@Override
+	public IRequestMessage getRequest(IIdentifier identifier, IError error, Object payload) {
+		IRequest request = manager.get(identifier, error, payload);
 
-        if (request == null)
-            return null;
+		if (request == null)
+			return null;
 
-        return new RequestMessage(request);
-    }
+		return new RequestMessage(request);
+	}
 
-    private class RequestMessage implements IRequestMessage {
-        private final IRequest request;
-        private boolean isSync;
-        private int timeout;
-        private Consumer<CallbackArgs> callback;
+	private class RequestMessage implements IRequestMessage {
+		private final IRequest request;
+		private boolean isSync;
+		private int timeout;
+		private Consumer<CallbackArgs> callback;
 
-        /**
-         * Creates a request message ready to be sent to the remote. By default, the
-         * message is sent asynchronously, there is no callback.
-         *
-         * @param request The request to send to the remote.
-         */
-        public RequestMessage(IRequest request) {
-            this.request = request;
+		/**
+		 * Creates a request message ready to be sent to the remote. By default, the message is sent asynchronously, there is no callback.
+		 *
+		 * @param request The request to send to the remote.
+		 */
+		public RequestMessage(IRequest request) {
+			this.request = request;
 
-            isSync = false;
-            timeout = -1;
-            callback = this::doNothing;
-        }
+			isSync = false;
+			timeout = -1;
+			callback = this::doNothing;
+		}
 
-        @Override
-        public float getVersion() {
-            return request.getVersion();
-        }
+		@Override
+		public float getVersion() {
+			return request.getVersion();
+		}
 
-        @Override
-        public IIdentifier getIdentifier() {
-            return request.getIdentifier();
-        }
+		@Override
+		public IIdentifier getIdentifier() {
+			return request.getIdentifier();
+		}
 
-        @Override
-        public IError getError() {
-            return request.getError();
-        }
+		@Override
+		public IError getError() {
+			return request.getError();
+		}
 
-        @Override
-        public Object getPayload() {
-            return request.getPayload();
-        }
+		@Override
+		public Object getPayload() {
+			return request.getPayload();
+		}
 
-        @Override
-        public byte[] getBytes() {
-            return request.getBytes();
-        }
+		@Override
+		public byte[] getBytes() {
+			return request.getBytes();
+		}
 
-        @Override
-        public boolean isSync() {
-            return isSync;
-        }
+		@Override
+		public boolean isSync() {
+			return isSync;
+		}
 
-        @Override
-        public void setSync(boolean isSync) {
-            this.isSync = isSync;
-        }
+		@Override
+		public void setSync(boolean isSync) {
+			this.isSync = isSync;
+		}
 
-        @Override
-        public int getTimeout() {
-            return timeout;
-        }
+		@Override
+		public int getTimeout() {
+			return timeout;
+		}
 
-        @Override
-        public Consumer<CallbackArgs> getCallback() {
-            return callback;
-        }
+		@Override
+		public Consumer<CallbackArgs> getCallback() {
+			return callback;
+		}
 
-        @Override
-        public void setCallback(Consumer<CallbackArgs> callback) {
-            setCallback(1000, callback);
-        }
+		@Override
+		public void setCallback(Consumer<CallbackArgs> callback) {
+			setCallback(1000, callback);
+		}
 
-        @Override
-        public void setCallback(int timeout, Consumer<CallbackArgs> callback) {
-            this.timeout = timeout;
-            this.callback = callback;
-        }
+		@Override
+		public void setCallback(int timeout, Consumer<CallbackArgs> callback) {
+			this.timeout = timeout;
+			this.callback = callback;
+		}
 
-        @Override
-        public String toString() {
-            return (request == null ? this : request).toString();
-        }
+		@Override
+		public String toString() {
+			return (request == null ? this : request).toString();
+		}
 
-        private void doNothing(CallbackArgs args) {
-            // Do nothing
-        }
-    }
+		private void doNothing(CallbackArgs args) {
+			// Do nothing
+		}
+	}
 }
