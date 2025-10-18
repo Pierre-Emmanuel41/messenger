@@ -3,7 +3,7 @@
 @rem Downloading dependencies
 @if not exist utils (
 	@echo Cloning git repo for project utils
-    @call git clone --branch 2.0-SNAPSHOT --single-branch https://github.com/Pierre-Emmanuel41/utils
+    @call git clone --branch 2.0-SNAPSHOT --single-branch https://github.com/Pierre-Emmanuel41/utils.git
 ) else ( 
 	@call cd utils
 
@@ -15,7 +15,7 @@
 
 @if not exist communication (
 	@echo Cloning git repo for project communication
-    @call git clone --branch 2.0-SNAPSHOT --single-branch https://github.com/Pierre-Emmanuel41/communication
+    @call git clone --branch 2.0-SNAPSHOT --single-branch https://github.com/Pierre-Emmanuel41/communication.git
 ) else (
 	@call cd communication
 
@@ -27,7 +27,7 @@
 
 @if not exist protocol (
 	@echo Cloning git repo for project protocol
-    @call git clone --branch 1.0-SNAPSHOT --single-branch https://github.com/Pierre-Emmanuel41/protocol
+    @call git clone --branch 1.0-SNAPSHOT --single-branch https://github.com/Pierre-Emmanuel41/protocol.git
 ) else ( 
 	@call cd protocol
 
