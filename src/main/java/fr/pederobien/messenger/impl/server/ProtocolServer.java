@@ -1,11 +1,19 @@
 package fr.pederobien.messenger.impl.server;
 
-import fr.pederobien.communication.event.*;
+import fr.pederobien.communication.event.NewClientEvent;
+import fr.pederobien.communication.event.ServerCloseEvent;
+import fr.pederobien.communication.event.ServerDisposeEvent;
+import fr.pederobien.communication.event.ServerOpenEvent;
+import fr.pederobien.communication.event.ServerUnstableEvent;
 import fr.pederobien.communication.impl.Communication;
 import fr.pederobien.communication.impl.ServerConfig;
 import fr.pederobien.communication.interfaces.server.IServer;
 import fr.pederobien.communication.interfaces.server.IServerImpl;
-import fr.pederobien.messenger.event.*;
+import fr.pederobien.messenger.event.NewProtocolClientEvent;
+import fr.pederobien.messenger.event.ProtocolServerCloseEvent;
+import fr.pederobien.messenger.event.ProtocolServerDisposeEvent;
+import fr.pederobien.messenger.event.ProtocolServerOpenEvent;
+import fr.pederobien.messenger.event.ProtocolServerUnstableEvent;
 import fr.pederobien.messenger.interfaces.server.IProtocolServer;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.utils.event.EventHandler;
@@ -51,6 +59,16 @@ public class ProtocolServer<T> implements IProtocolServer, IEventListener {
 	@Override
 	public boolean dispose() {
 		return server.dispose();
+	}
+
+	@Override
+	public boolean isOpened() {
+		return server.isOpened();
+	}
+
+	@Override
+	public boolean isDisposed() {
+		return server.isDisposed();
 	}
 
 	@Override
