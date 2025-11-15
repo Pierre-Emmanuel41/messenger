@@ -6,47 +6,17 @@ import fr.pederobien.messenger.interfaces.IProtocolConfiguration;
 import fr.pederobien.messenger.interfaces.IRequestHandler;
 import fr.pederobien.protocol.interfaces.IIdentifier;
 
-import java.util.function.Supplier;
-
 public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
 
 	/**
 	 * @return The direction of the communication.
 	 */
-	default Mode getMode() {
-		return Mode.CLIENT_TO_SERVER;
-	}
+	Mode getMode();
 
 	/**
-	 * @return The object that gather remote information.
+	 * @return The name of the connection. Essentially used for logging.
 	 */
-	T getEndPoint();
-
-	/**
-	 * @return The client's name. Essentially used for logging.
-	 */
-	String getName();
-
-	/**
-	 * Register a request handler to execute when an unexpected request is received from the server.
-	 *
-	 * @param identifier The request identifier.
-	 * @param handler    The action to execute when a message has been received.
-	 */
-	void addRequestHandler(IIdentifier identifier, IRequestHandler handler);
-
-	/**
-	 * Get the action associated to the given identifier.
-	 *
-	 * @param identifier The identifier used to get its associated action.
-	 * @return The handler to execute, if it exists, null otherwise.
-	 */
-	IRequestHandler getHandler(IIdentifier identifier);
-
-	/**
-	 * @return An object that specify how a layer must be initialized.
-	 */
-	Supplier<ILayerInitializer> getLayerInitializer();
+	String getConnectionName();
 
 	/**
 	 * The connection to the remote is monitored so that if an error is happening, a counter is incremented automatically. The
@@ -83,6 +53,21 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
 	int getReconnectionDelay();
 
 	/**
+	 * @return An object that specify how a layer must be initialized.
+	 */
+	ILayerInitializer getLayerInitializer();
+
+	/**
+	 * @return The object that gather remote information.
+	 */
+	T getEndPoint();
+
+	/**
+	 * @return The client's name. Essentially used for logging.
+	 */
+	String getName();
+
+	/**
 	 * The connection to the remote is monitored so that if an error is happening, a counter is incremented automatically. The client
 	 * max counter value is the maximum value the unstable counter can reach before throwing a client unstable event. This counter is
 	 * incremented each time a connection unstable event is thrown.
@@ -100,4 +85,21 @@ public interface IProtocolClientConfig<T> extends IProtocolConfiguration {
 	 * @return The time, in ms, after which the client's error counter is decremented.
 	 */
 	int getClientHealTime();
+
+	/**
+	 * Register a request handler to execute when an unexpected request is received from the server.
+	 *
+	 * @param identifier The request identifier.
+	 * @param handler    The action to execute when a message has been received.
+	 */
+	void addRequestHandler(IIdentifier identifier, IRequestHandler handler);
+
+	/**
+	 * Get the action associated to the given identifier.
+	 *
+	 * @param identifier The identifier used to get its associated action.
+	 * @return The handler to execute, if it exists, null otherwise.
+	 */
+	IRequestHandler getHandler(IIdentifier identifier);
+
 }

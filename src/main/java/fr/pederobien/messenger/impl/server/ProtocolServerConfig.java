@@ -1,23 +1,18 @@
 package fr.pederobien.messenger.impl.server;
 
-import fr.pederobien.communication.impl.layer.LayerInitializer;
+import java.util.function.Supplier;
+
+import fr.pederobien.communication.impl.Communication;
+import fr.pederobien.communication.impl.ServerConfig;
+import fr.pederobien.communication.interfaces.connection.IConnection.Mode;
 import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.communication.interfaces.server.IClientValidator;
 import fr.pederobien.messenger.impl.ProtocolConfiguration;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.protocol.interfaces.IProtocolManager;
 
-import java.util.function.Supplier;
-
 public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IProtocolServerConfig<T> {
-	private final String name;
-	private final T point;
-	private Supplier<ILayerInitializer> layerInitializer;
-	private int connectionMaxUnstableCounter;
-	private int connectionHealTime;
-	private IClientValidator<T> clientValidator;
-	private int serverMaxUnstableCounter;
-	private int serverHealTime;
+	private final ServerConfig<T> config;
 
 	/**
 	 * Creates a server configuration associated to a protocol manager.
@@ -29,44 +24,31 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	public ProtocolServerConfig(IProtocolManager manager, String name, T point) {
 		super(manager);
 
-		this.name = name;
-		this.point = point;
-
-		layerInitializer = () -> new LayerInitializer();
-		connectionMaxUnstableCounter = 10;
-		connectionHealTime = 1000;
-		clientValidator = _ -> true;
-		serverMaxUnstableCounter = 5;
-		serverHealTime = 1000;
+		config = Communication.createServerConfig(name, point);
 	}
 
 	@Override
-	public String getName() {
-		return name;
+	public Mode getMode() {
+		return config.getMode();
 	}
 
 	@Override
-	public T getPoint() {
-		return point;
-	}
-
-	@Override
-	public Supplier<ILayerInitializer> getLayerInitializer() {
-		return layerInitializer;
+	public String getConnectionName() {
+		return config.getConnectionName();
 	}
 
 	/**
-	 * Set how a layer must be initialized.
-	 *
-	 * @param layerInitializer The initialisation sequence.
+	 * Set the name of the connection with the remote. Essentially used for logging.
+	 * 
+	 * @param name The connection name.
 	 */
-	public void setLayerInitializer(Supplier<ILayerInitializer> layerInitializer) {
-		this.layerInitializer = layerInitializer;
+	public void setConnectionName(String name) {
+		config.setConnectionName(name);
 	}
 
 	@Override
 	public int getConnectionMaxUnstableCounter() {
-		return connectionMaxUnstableCounter;
+		return config.getConnectionMaxUnstableCounter();
 	}
 
 	/**
@@ -76,12 +58,12 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	 * @param connectionMaxUnstableCounter The maximum value the connection's unstable counter can reach.
 	 */
 	public void setConnectionMaxUnstableCounter(int connectionMaxUnstableCounter) {
-		this.connectionMaxUnstableCounter = connectionMaxUnstableCounter;
+		config.setConnectionMaxUnstableCounter(connectionMaxUnstableCounter);
 	}
 
 	@Override
 	public int getConnectionHealTime() {
-		return connectionHealTime;
+		return config.getConnectionHealTime();
 	}
 
 	/**
@@ -93,12 +75,45 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	 * @param connectionHealTime The time, in ms, after which the connection's error counter is decremented.
 	 */
 	public void setConnectionHealTime(int connectionHealTime) {
-		this.connectionHealTime = connectionHealTime;
+		config.setConnectionHealTime(connectionHealTime);
+	}
+
+	@Override
+	public ILayerInitializer getLayerInitializer() {
+		return config.getLayerInitializer();
+	}
+
+	/**
+	 * Set how a layer must be initialized.
+	 *
+	 * @param layerInitializer The initialisation sequence.
+	 */
+	public void setLayerInitializer(Supplier<ILayerInitializer> layerInitializer) {
+		config.setLayerInitializer(layerInitializer);
+	}
+
+	@Override
+	public String getName() {
+		return config.getName();
+	}
+
+	/**
+	 * Set the name of the server.
+	 * 
+	 * @param name The new server's name.
+	 */
+	public void setName(String name) {
+		config.setName(name);
+	}
+
+	@Override
+	public T getPoint() {
+		return config.getPoint();
 	}
 
 	@Override
 	public IClientValidator<T> getClientValidator() {
-		return clientValidator;
+		return config.getClientValidator();
 	}
 
 	/**
@@ -107,12 +122,12 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	 * @param clientValidator The validator to authorize a client to be connected to the server.
 	 */
 	public void setClientValidator(IClientValidator<T> clientValidator) {
-		this.clientValidator = clientValidator;
+		config.setClientValidator(clientValidator);
 	}
 
 	@Override
 	public int getServerMaxUnstableCounter() {
-		return serverMaxUnstableCounter;
+		return config.getServerMaxUnstableCounter();
 	}
 
 	/**
@@ -124,12 +139,12 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	 * @param serverMaxUnstableCounter The maximum value the server's unstable counter can reach.
 	 */
 	public void setServerMaxUnstableCounter(int serverMaxUnstableCounter) {
-		this.serverMaxUnstableCounter = serverMaxUnstableCounter;
+		config.setConnectionMaxUnstableCounter(serverMaxUnstableCounter);
 	}
 
 	@Override
 	public int getServerHealTime() {
-		return serverHealTime;
+		return config.getServerHealTime();
 	}
 
 	/**
@@ -141,6 +156,6 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	 * @param serverHealTime The time, in ms, after which the server's error counter is decremented.
 	 */
 	public void setServerHealTime(int serverHealTime) {
-		this.serverHealTime = serverHealTime;
+		config.setServerHealTime(serverHealTime);
 	}
 }

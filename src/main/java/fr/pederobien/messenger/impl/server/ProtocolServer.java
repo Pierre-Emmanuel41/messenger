@@ -6,7 +6,6 @@ import fr.pederobien.communication.event.ServerDisposeEvent;
 import fr.pederobien.communication.event.ServerOpenEvent;
 import fr.pederobien.communication.event.ServerUnstableEvent;
 import fr.pederobien.communication.impl.Communication;
-import fr.pederobien.communication.impl.ServerConfig;
 import fr.pederobien.communication.interfaces.server.IServer;
 import fr.pederobien.communication.interfaces.server.IServerImpl;
 import fr.pederobien.messenger.event.NewProtocolClientEvent;
@@ -33,16 +32,7 @@ public class ProtocolServer<T> implements IProtocolServer, IEventListener {
 	public ProtocolServer(IProtocolServerConfig<T> config, IServerImpl<T> impl) {
 		this.config = config;
 
-		ServerConfig<T> serverConfig = Communication.createServerConfig(config.getName(), config.getPoint());
-		serverConfig.setLayerInitializer(config.getLayerInitializer());
-		serverConfig.setConnectionMaxUnstableCounter(config.getConnectionMaxUnstableCounter());
-		serverConfig.setConnectionHealTime(config.getConnectionHealTime());
-		serverConfig.setClientValidator(config.getClientValidator());
-		serverConfig.setServerMaxUnstableCounter(config.getServerMaxUnstableCounter());
-		serverConfig.setServerHealTime(config.getServerHealTime());
-
-		server = Communication.createServer(serverConfig, impl);
-
+		server = Communication.createServer(config, impl);
 		EventManager.registerListener(this);
 	}
 

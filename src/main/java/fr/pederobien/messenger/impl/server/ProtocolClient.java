@@ -1,5 +1,8 @@
 package fr.pederobien.messenger.impl.server;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import fr.pederobien.communication.event.MessageEvent;
 import fr.pederobien.communication.interfaces.connection.IConnection;
 import fr.pederobien.messenger.impl.ProtocolConnection;
@@ -11,11 +14,7 @@ import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.protocol.interfaces.IError;
 import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IRequest;
-import fr.pederobien.utils.ByteWrapper;
 import fr.pederobien.utils.event.Logger;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ProtocolClient implements IProtocolClient {
 	private final IProtocolServerConfig<?> config;
@@ -78,8 +77,6 @@ public class ProtocolClient implements IProtocolClient {
 	 * @param event The event that contains the unexpected request.
 	 */
 	private void onMessageReceived(MessageEvent event) {
-		debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
-
 		// Parsing client request
 		IRequest request = config.parse(event.getData());
 		if (request == null) {
@@ -93,8 +90,6 @@ public class ProtocolClient implements IProtocolClient {
 			debug("No request handler defined");
 			return;
 		}
-
-		debug("Calling the associated request handler");
 
 		// Applying the action
 		handler.apply(connection, event.getIdentifier(), request.getPayload());

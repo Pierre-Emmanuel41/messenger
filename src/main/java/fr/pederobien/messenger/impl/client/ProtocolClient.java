@@ -3,10 +3,13 @@ package fr.pederobien.messenger.impl.client;
 import fr.pederobien.communication.event.ClientConnectedEvent;
 import fr.pederobien.communication.event.ClientUnstableEvent;
 import fr.pederobien.communication.event.MessageEvent;
-import fr.pederobien.communication.impl.ClientConfig;
 import fr.pederobien.communication.impl.Communication;
+import fr.pederobien.communication.interfaces.IMessageHandler;
 import fr.pederobien.communication.interfaces.client.IClient;
+import fr.pederobien.communication.interfaces.client.IClientConfig;
 import fr.pederobien.communication.interfaces.client.IClientImpl;
+import fr.pederobien.communication.interfaces.connection.IConnection.Mode;
+import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.messenger.event.ProtocolClientConnectedEvent;
 import fr.pederobien.messenger.event.ProtocolClientUnstableEvent;
 import fr.pederobien.messenger.impl.ProtocolConnection;
@@ -35,18 +38,10 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
 	public ProtocolClient(IProtocolClientConfig<T> config, IClientImpl<T> impl) {
 		this.config = config;
 
-		// Creating a configuration for the client to connect to the server
-		ClientConfig<T> clientConfig = Communication.createClientConfig(config.getName(), config.getEndPoint());
-		clientConfig.setLayerInitializer(config.getLayerInitializer());
-		clientConfig.setConnectionMaxUnstableCounter(config.getConnectionMaxUnstableCounter());
-		clientConfig.setConnectionHealTime(config.getConnectionHealTime());
-		clientConfig.setConnectionTimeout(config.getConnectionTimeout());
-		clientConfig.setAutomaticReconnection(config.isAutomaticReconnection());
-		clientConfig.setReconnectionDelay(config.getReconnectionDelay());
-		clientConfig.setClientMaxUnstableCounter(config.getClientMaxUnstableCounter());
-		clientConfig.setMessageHandler(this::onMessageReceived);
+		ClientConfigWrapper wrapper = new ClientConfigWrapper(config);
+		wrapper.setMessageHandler(this::onMessageReceived);
 
-		client = Communication.createClient(clientConfig, impl);
+		client = Communication.createClient(wrapper, impl);
 	}
 
 	@Override
@@ -104,12 +99,10 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
 	 * @param event The event that contains the data.
 	 */
 	private void onMessageReceived(MessageEvent event) {
-		debug("Unexpected message received : %s", ByteWrapper.wrap(event.getData()));
-
 		// Parsing server request
 		IRequest request = config.parse(event.getData());
 		if (request == null) {
-			debug("Unknown message");
+			debug("Received unsupported request: %s", ByteWrapper.wrap(event.getData()));
 			return;
 		}
 
@@ -119,8 +112,6 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
 			debug("No request handler defined");
 			return;
 		}
-
-		debug("Calling the associated request handler");
 
 		// Applying the action
 		handler.apply(connection, event.getIdentifier(), request.getPayload());
@@ -134,5 +125,88 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
 	 */
 	private void debug(String message, Object... args) {
 		Logger.debug("%s - %s", this, String.format(message, args));
+	}
+
+	private class ClientConfigWrapper implements IClientConfig<T> {
+		private IProtocolClientConfig<T> source;
+		private IMessageHandler handler;
+
+		private ClientConfigWrapper(IProtocolClientConfig<T> source) {
+			this.source = source;
+		}
+
+		@Override
+		public Mode getMode() {
+			return source.getMode();
+		}
+
+		@Override
+		public String getConnectionName() {
+			return source.getConnectionName();
+		}
+
+		@Override
+		public ILayerInitializer getLayerInitializer() {
+			return source.getLayerInitializer();
+		}
+
+		@Override
+		public int getConnectionMaxUnstableCounter() {
+			return source.getConnectionMaxUnstableCounter();
+		}
+
+		@Override
+		public int getConnectionHealTime() {
+			return source.getConnectionHealTime();
+		}
+
+		@Override
+		public T getEndPoint() {
+			return source.getEndPoint();
+		}
+
+		@Override
+		public String getName() {
+			return source.getName();
+		}
+
+		@Override
+		public IMessageHandler getMessageHandler() {
+			return handler;
+		}
+
+		/**
+		 * Set the handler to execute when an unexpected request has been received from the remote. The default handler to nothing.
+		 *
+		 * @param messageHandler The handler to call.
+		 */
+		public void setMessageHandler(IMessageHandler handler) {
+			this.handler = handler;
+		}
+
+		@Override
+		public int getConnectionTimeout() {
+			return source.getConnectionTimeout();
+		}
+
+		@Override
+		public boolean isAutomaticReconnection() {
+			return source.isAutomaticReconnection();
+		}
+
+		@Override
+		public int getReconnectionDelay() {
+			return source.getReconnectionDelay();
+		}
+
+		@Override
+		public int getClientMaxUnstableCounter() {
+			return source.getClientMaxUnstableCounter();
+		}
+
+		@Override
+		public int getClientHealTime() {
+			return source.getClientHealTime();
+		}
 	}
 }
