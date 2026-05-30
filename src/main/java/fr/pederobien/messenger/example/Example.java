@@ -8,7 +8,9 @@ import fr.pederobien.utils.event.Logger;
 public class Example {
 
 	public static void main(String[] args) {
-		Logger.instance().newLine(true).timeStamp(true).debug(true).colorized(true);
+		Logger.setPrintInColor(true);
+		Logger.setPrintEvent(true);
+
 		MyCustomTcpProtocolServer server = new MyCustomTcpProtocolServer();
 		server.open();
 

@@ -102,6 +102,6 @@ public class ProtocolClient implements IProtocolClient {
 	 * @param args    The arguments of the message.
 	 */
 	private void debug(String message, Object... args) {
-		Logger.debug("%s - %s", this, String.format(message, args));
+		Logger.debug(2, "%s - %s", this, String.format(message, args));
 	}
 }

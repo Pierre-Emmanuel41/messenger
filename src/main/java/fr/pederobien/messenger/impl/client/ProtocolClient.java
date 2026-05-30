@@ -124,7 +124,7 @@ public class ProtocolClient<T> implements IProtocolClient, IEventListener {
 	 * @param args    The arguments of the message.
 	 */
 	private void debug(String message, Object... args) {
-		Logger.debug("%s - %s", this, String.format(message, args));
+		Logger.debug(2, "%s - %s", this, String.format(message, args));
 	}
 
 	private class ClientConfigWrapper implements IClientConfig<T> {
