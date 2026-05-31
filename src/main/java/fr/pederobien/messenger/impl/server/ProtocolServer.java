@@ -19,8 +19,8 @@ import fr.pederobien.utils.event.EventHandler;
 import fr.pederobien.utils.event.EventManager;
 import fr.pederobien.utils.event.IEventListener;
 
-public class ProtocolServer<T> implements IProtocolServer, IEventListener {
-	private final IProtocolServerConfig<T> config;
+public class ProtocolServer<T, U> implements IProtocolServer, IEventListener {
+	private final IProtocolServerConfig<T, U> config;
 	private final IServer server;
 
 	/**
@@ -29,7 +29,7 @@ public class ProtocolServer<T> implements IProtocolServer, IEventListener {
 	 * @param config The configuration that contains server parameters.
 	 * @param impl   The server implementation.
 	 */
-	public ProtocolServer(IProtocolServerConfig<T> config, IServerImpl<T> impl) {
+	public ProtocolServer(IProtocolServerConfig<T, U> config, IServerImpl<T, U> impl) {
 		this.config = config;
 
 		server = Communication.createServer(config, impl);
@@ -71,7 +71,7 @@ public class ProtocolServer<T> implements IProtocolServer, IEventListener {
 		if (event.getServer() != server)
 			return;
 
-		EventManager.callEvent(new NewProtocolClientEvent(this, new ProtocolClient(config, event.getConnection())));
+		EventManager.callEvent(new NewProtocolClientEvent(this, new ProtocolClient<T, U>(config, event.getConnection())));
 	}
 
 	@EventHandler

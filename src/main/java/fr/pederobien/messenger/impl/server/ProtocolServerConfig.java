@@ -3,7 +3,7 @@ package fr.pederobien.messenger.impl.server;
 import java.util.function.Supplier;
 
 import fr.pederobien.communication.impl.Communication;
-import fr.pederobien.communication.impl.ServerConfig;
+import fr.pederobien.communication.impl.server.ServerConfig;
 import fr.pederobien.communication.interfaces.connection.IConnection.Mode;
 import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.communication.interfaces.server.IClientValidator;
@@ -11,8 +11,8 @@ import fr.pederobien.messenger.impl.ProtocolConfiguration;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
 import fr.pederobien.protocol.interfaces.IProtocolManager;
 
-public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IProtocolServerConfig<T> {
-	private final ServerConfig<T> config;
+public class ProtocolServerConfig<T, U> extends ProtocolConfiguration implements IProtocolServerConfig<T, U> {
+	private final ServerConfig<T, U> config;
 
 	/**
 	 * Creates a server configuration associated to a protocol manager.
@@ -112,7 +112,7 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	}
 
 	@Override
-	public IClientValidator<T> getClientValidator() {
+	public IClientValidator<U> getClientValidator() {
 		return config.getClientValidator();
 	}
 
@@ -121,7 +121,7 @@ public class ProtocolServerConfig<T> extends ProtocolConfiguration implements IP
 	 *
 	 * @param clientValidator The validator to authorize a client to be connected to the server.
 	 */
-	public void setClientValidator(IClientValidator<T> clientValidator) {
+	public void setClientValidator(IClientValidator<U> clientValidator) {
 		config.setClientValidator(clientValidator);
 	}
 

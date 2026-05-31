@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import fr.pederobien.communication.impl.ClientConfig;
 import fr.pederobien.communication.impl.Communication;
+import fr.pederobien.communication.impl.client.ClientConfig;
 import fr.pederobien.communication.interfaces.connection.IConnection.Mode;
 import fr.pederobien.communication.interfaces.layer.ILayerInitializer;
 import fr.pederobien.messenger.impl.ProtocolConfiguration;

@@ -16,8 +16,8 @@ import fr.pederobien.protocol.interfaces.IIdentifier;
 import fr.pederobien.protocol.interfaces.IRequest;
 import fr.pederobien.utils.event.Logger;
 
-public class ProtocolClient implements IProtocolClient {
-	private final IProtocolServerConfig<?> config;
+public class ProtocolClient<T, U> implements IProtocolClient {
+	private final IProtocolServerConfig<T, U> config;
 	private final IProtocolConnection connection;
 	private final Map<IIdentifier, IRequestHandler> handlers;
 
@@ -27,7 +27,7 @@ public class ProtocolClient implements IProtocolClient {
 	 * @param config     The server configuration that gather protocol and supported requests.
 	 * @param connection The connection to with the remote.
 	 */
-	protected ProtocolClient(IProtocolServerConfig<?> config, IConnection connection) {
+	protected ProtocolClient(IProtocolServerConfig<T, U> config, IConnection connection) {
 		this.config = config;
 		this.connection = new ProtocolConnection(connection);
 

@@ -23,7 +23,7 @@ public class MyCustomTcpProtocolClient {
 	public MyCustomTcpProtocolClient() {
 		IEthernetEndPoint endPoint = new EthernetEndPoint("127.0.0.1", 12345);
 
-		config = Messenger.createClientConfig(MyProtocolManager.getInstance(), "My TCP client", endPoint);
+		config = Messenger.createProtocolClientConfig(MyProtocolManager.getInstance(), "My TCP client", endPoint);
 
 		// Setting the layer to use to pack/unpack data.
 		config.setLayerInitializer(() -> new AesSafeLayerInitializer(new SimpleCertificate()));
@@ -58,7 +58,7 @@ public class MyCustomTcpProtocolClient {
 		config.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
 
 		// Creating the client
-		client = Messenger.createTcpClient(config);
+		client = Messenger.createTcpProtocolClient(config);
 	}
 
 	/**
