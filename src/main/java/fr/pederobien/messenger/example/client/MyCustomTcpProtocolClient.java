@@ -2,14 +2,14 @@ package fr.pederobien.messenger.example.client;
 
 import fr.pederobien.communication.impl.EthernetEndPoint;
 import fr.pederobien.communication.impl.layer.AesSafeLayerInitializer;
+import fr.pederobien.communication.impl.layer.SimpleCertificate;
 import fr.pederobien.communication.interfaces.IEthernetEndPoint;
-import fr.pederobien.communication.testing.tools.SimpleCertificate;
 import fr.pederobien.messenger.example.Errors;
 import fr.pederobien.messenger.example.Identifiers;
 import fr.pederobien.messenger.example.MyProtocolManager;
 import fr.pederobien.messenger.example.wrappers.Player;
 import fr.pederobien.messenger.impl.Messenger;
-import fr.pederobien.messenger.impl.client.ProtocolClientConfig;
+import fr.pederobien.messenger.impl.client.EthernetProtocolClientConfig;
 import fr.pederobien.messenger.interfaces.IProtocolConnection;
 import fr.pederobien.messenger.interfaces.IRequestMessage;
 import fr.pederobien.messenger.interfaces.client.IProtocolClient;
@@ -18,12 +18,12 @@ import fr.pederobien.utils.event.Logger;
 
 public class MyCustomTcpProtocolClient {
 	private final IProtocolClient client;
-	private final ProtocolClientConfig<IEthernetEndPoint> config;
+	private final EthernetProtocolClientConfig config;
 
 	public MyCustomTcpProtocolClient() {
 		IEthernetEndPoint endPoint = new EthernetEndPoint("127.0.0.1", 12345);
 
-		config = Messenger.createProtocolClientConfig(MyProtocolManager.getInstance(), "My TCP client", endPoint);
+		config = Messenger.createEthernetClientConfig(MyProtocolManager.getInstance(), "My TCP client", endPoint);
 
 		// Setting the layer to use to pack/unpack data.
 		config.setLayerInitializer(() -> new AesSafeLayerInitializer(new SimpleCertificate()));
@@ -58,7 +58,7 @@ public class MyCustomTcpProtocolClient {
 		config.addRequestHandler(Identifiers.PLAYER_ID, this::onPlayerReceived);
 
 		// Creating the client
-		client = Messenger.createTcpProtocolClient(config);
+		client = Messenger.createTcpClient(config);
 	}
 
 	/**

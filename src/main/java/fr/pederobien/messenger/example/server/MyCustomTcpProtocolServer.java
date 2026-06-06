@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Objects;
 
 import fr.pederobien.communication.impl.layer.AesSafeLayerInitializer;
+import fr.pederobien.communication.impl.layer.SimpleCertificate;
 import fr.pederobien.communication.impl.server.ethernet.ServerEthernetEndPoint;
 import fr.pederobien.communication.interfaces.IEthernetEndPoint;
-import fr.pederobien.communication.testing.tools.SimpleCertificate;
 import fr.pederobien.messenger.event.NewProtocolClientEvent;
 import fr.pederobien.messenger.example.MyProtocolManager;
 import fr.pederobien.messenger.impl.Messenger;
@@ -25,7 +25,7 @@ public class MyCustomTcpProtocolServer implements IEventListener {
 	public MyCustomTcpProtocolServer() {
 		clients = new ArrayList<MyCustomTcpProtocolClient>();
 
-		config = Messenger.createEthernetProtocolServerConfig(MyProtocolManager.getInstance(), "My TCP server", new ServerEthernetEndPoint(12345));
+		config = Messenger.createEthernetServerConfig(MyProtocolManager.getInstance(), "My TCP server", new ServerEthernetEndPoint(12345));
 
 		// Setting the layer to use to pack/unpack data.
 		// A new layer is defined each time a new client is connected
@@ -47,7 +47,7 @@ public class MyCustomTcpProtocolServer implements IEventListener {
 		// Decrement the value of the server unstable counter each 5 ms
 		config.setServerHealTime(5);
 
-		server = Messenger.createTcpProtocolServer(config);
+		server = Messenger.createTcpServer(config);
 
 		EventManager.registerListener(this);
 	}
