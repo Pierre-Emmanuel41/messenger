@@ -15,12 +15,14 @@ import fr.pederobien.communication.interfaces.server.IServerImpl;
 import fr.pederobien.messenger.impl.client.EthernetProtocolClientConfig;
 import fr.pederobien.messenger.impl.client.ProtocolClient;
 import fr.pederobien.messenger.impl.client.ProtocolClientConfig;
+import fr.pederobien.messenger.impl.server.EthernetProtocolServer;
 import fr.pederobien.messenger.impl.server.EthernetProtocolServerConfig;
 import fr.pederobien.messenger.impl.server.ProtocolServer;
 import fr.pederobien.messenger.impl.server.ProtocolServerConfig;
 import fr.pederobien.messenger.interfaces.client.IEthernetProtocolClientConfig;
 import fr.pederobien.messenger.interfaces.client.IProtocolClient;
 import fr.pederobien.messenger.interfaces.client.IProtocolClientConfig;
+import fr.pederobien.messenger.interfaces.server.IEthernetProtocolServer;
 import fr.pederobien.messenger.interfaces.server.IEthernetProtocolServerConfig;
 import fr.pederobien.messenger.interfaces.server.IProtocolServer;
 import fr.pederobien.messenger.interfaces.server.IProtocolServerConfig;
@@ -143,13 +145,13 @@ public class Messenger {
 	}
 
 	/**
-	 * Creates a server associated to a protocol.
+	 * Creates an ethernet server associated to a protocol.
 	 *
 	 * @param config The server configuration.
 	 * @param impl   The server implementation.
 	 */
-	public static final IProtocolServer createEthernetServer(IEthernetProtocolServerConfig config, IEthernetServerImpl impl) {
-		return createServer(config, impl);
+	public static final IEthernetProtocolServer createEthernetServer(IEthernetProtocolServerConfig config, IEthernetServerImpl impl) {
+		return new EthernetProtocolServer(config, impl);
 	}
 
 	/**
@@ -157,8 +159,8 @@ public class Messenger {
 	 *
 	 * @param config The object that holds the server configuration.
 	 */
-	public static final IProtocolServer createTcpServer(IEthernetProtocolServerConfig config) {
-		return createServer(config, new TcpServerImpl());
+	public static final IEthernetProtocolServer createTcpServer(IEthernetProtocolServerConfig config) {
+		return createEthernetServer(config, new TcpServerImpl());
 	}
 
 	/**
@@ -166,8 +168,8 @@ public class Messenger {
 	 *
 	 * @param config The object that holds the server configuration.
 	 */
-	public static final IProtocolServer createUdpServer(IEthernetProtocolServerConfig config) {
-		return createServer(config, new UdpServerImpl());
+	public static final IEthernetProtocolServer createUdpServer(IEthernetProtocolServerConfig config) {
+		return createEthernetServer(config, new UdpServerImpl());
 	}
 
 	/**
@@ -177,7 +179,7 @@ public class Messenger {
 	 * @param address The server's IP address.
 	 * @param port    The server's port number.
 	 */
-	public static final IProtocolServer createDefaultTcpServer(IProtocolManager manager, String address, int port) {
+	public static final IEthernetProtocolServer createDefaultTcpServer(IProtocolManager manager, String address, int port) {
 		return createTcpServer(createEthernetServerConfig(manager, "TCP Server", new ServerEthernetEndPoint(address, port)));
 	}
 
@@ -187,7 +189,7 @@ public class Messenger {
 	 * @param manager The manager that contains supported protocols.
 	 * @param port    The server's port number.
 	 */
-	public static final IProtocolServer createDefaultTcpServer(IProtocolManager manager, int port) {
+	public static final IEthernetProtocolServer createDefaultTcpServer(IProtocolManager manager, int port) {
 		return createTcpServer(createEthernetServerConfig(manager, "TCP Server", new ServerEthernetEndPoint(port)));
 	}
 
@@ -199,7 +201,7 @@ public class Messenger {
 	 * @param min     The minimum value of the port number of the server.
 	 * @param max     The maximum value of the port number of the server.
 	 */
-	public static final IProtocolServer createDefaultTcpServer(IProtocolManager manager, String address, int min, int max) {
+	public static final IEthernetProtocolServer createDefaultTcpServer(IProtocolManager manager, String address, int min, int max) {
 		return createTcpServer(createEthernetServerConfig(manager, "TCP Server", new ServerEthernetEndPoint(address, min, max)));
 	}
 
@@ -210,7 +212,7 @@ public class Messenger {
 	 * @param min     The minimum value of the port number of the server.
 	 * @param max     The maximum value of the port number of the server.
 	 */
-	public static final IProtocolServer createDefaultTcpServer(IProtocolManager manager, int min, int max) {
+	public static final IEthernetProtocolServer createDefaultTcpServer(IProtocolManager manager, int min, int max) {
 		return createTcpServer(createEthernetServerConfig(manager, "TCP Server", new ServerEthernetEndPoint(min, max)));
 	}
 
@@ -221,7 +223,7 @@ public class Messenger {
 	 * @param address The server's IP address.
 	 * @param port    The server's port number.
 	 */
-	public static final IProtocolServer createDefaultUdpServer(IProtocolManager manager, String address, int port) {
+	public static final IEthernetProtocolServer createDefaultUdpServer(IProtocolManager manager, String address, int port) {
 		return createUdpServer(createEthernetServerConfig(manager, "UDP server", new ServerEthernetEndPoint(address, port)));
 	}
 
@@ -231,7 +233,7 @@ public class Messenger {
 	 * @param manager The manager that contains supported protocols.
 	 * @param port    The server's port number.
 	 */
-	public static final IProtocolServer createDefaultUdpServer(IProtocolManager manager, int port) {
+	public static final IEthernetProtocolServer createDefaultUdpServer(IProtocolManager manager, int port) {
 		return createUdpServer(createEthernetServerConfig(manager, "UDP server", new ServerEthernetEndPoint(port)));
 	}
 
@@ -243,7 +245,7 @@ public class Messenger {
 	 * @param min     The minimum value of the port number of the server.
 	 * @param max     The maximum value of the port number of the server.
 	 */
-	public static final IProtocolServer createDefaultUdpServer(IProtocolManager manager, String address, int min, int max) {
+	public static final IEthernetProtocolServer createDefaultUdpServer(IProtocolManager manager, String address, int min, int max) {
 		return createUdpServer(createEthernetServerConfig(manager, "UDP server", new ServerEthernetEndPoint(address, min, max)));
 	}
 
@@ -254,7 +256,7 @@ public class Messenger {
 	 * @param min     The minimum value of the port number of the server.
 	 * @param max     The maximum value of the port number of the server.
 	 */
-	public static final IProtocolServer createDefaultUdpServer(IProtocolManager manager, int min, int max) {
+	public static final IEthernetProtocolServer createDefaultUdpServer(IProtocolManager manager, int min, int max) {
 		return createUdpServer(createEthernetServerConfig(manager, "UDP server", new ServerEthernetEndPoint(min, max)));
 	}
 }
